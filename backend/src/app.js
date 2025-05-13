@@ -21,9 +21,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Servir uploads estáticos
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Servir uploads estáticos
+app.use('/uploads',
+   express.static(path.join(__dirname, '../uploads'))
+   );
 // Rota de health-check
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
 

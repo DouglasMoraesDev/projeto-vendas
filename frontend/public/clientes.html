@@ -1,4 +1,3 @@
-<!-- exemplo: clientes.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,8 +6,21 @@
   <title>Clientes</title>
 </head>
 <body>
-  <h1>Lista de Clientes</h1>
-  <ul id="lista"></ul>
-  <script src="js/pages/clientes.js"></script>
+  <h1>Clientes</h1>
+  
+  <button id="btn-novo">Novo Cliente</button>
+  <form id="form-cliente" style="display:none">
+    <label>Nome:     <input name="nome" required></label>
+    <label>CPF:      <input name="cpf" required></label>
+    <label>Telefone: <input name="telefone" required></label>
+    <label>Endereço: <input name="endereco"></label>
+    <button type="submit">Salvar</button>
+    <button type="button" id="btn-cancel">Cancelar</button>
+  </form>
+  
+  <ul id="lista-clientes"></ul>
+  
+  <!-- include como módulo ES -->
+  <script type="module" src="js/clientes.js"></script>
 </body>
 </html>
