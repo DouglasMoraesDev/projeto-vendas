@@ -5,13 +5,13 @@ commands = [
   "cd frontend && npm install"
 ]
 
-# Gera o Prisma Client
+# Gera o Prisma Client e aplica migrations em produção
 [phases.build]
 commands = [
-  "cd backend && npx prisma generate"
+  "cd backend && npx prisma generate && npx prisma migrate deploy"
 ]
 
-# Inicia o backend (que também serve o frontend)
+# Inicia o backend (que já serve o diretório frontend/public)
 [phases.start]
 commands = [
   "cd backend && npm start"
