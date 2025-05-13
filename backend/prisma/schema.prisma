@@ -91,7 +91,7 @@ model Parcela {
 model Comprovante {
   id           Int       @id @default(autoincrement())
   parcela      Parcela   @relation(fields: [parcelaId], references: [id])
-  parcelaId    Int
+  parcelaId    Int       @unique      // Garante relação 1:1
   caminho      String    // ex: "/uploads/comprovantes/123/recibo.pdf"
   recebidoPor  String
   criadoEm     DateTime  @default(now())

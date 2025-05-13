@@ -2,8 +2,7 @@
   "name": "projeto-vendas-backend",
   "version": "1.0.0",
   "main": "src/app.js",
-  "scripts": {
-    "start": "node src/app.js",      
+  "scripts": {      
     "dev": "nodemon src/app.js",     
     "migrate": "prisma migrate dev --name init"
   },
@@ -20,5 +19,6 @@
   "devDependencies": {
     "nodemon": "^2.0.20",
     "prisma": "^4.0.0"
-  }
+  },
+  "postinstall": "prisma generate"
 }
