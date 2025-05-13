@@ -1,90 +1,88 @@
-// src/controllers/mercadoriaController.js
+// CRUD de mercadorias + upload de fotos
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const fs = require('fs');
 const path = require('path');
 
 module.exports = {
+  // GET /api/mercadorias
   async findAll(req, res, next) {
     try {
       const list = await prisma.mercadoria.findMany({ include: { fotos: true } });
       res.json(list);
-    } catch (err) {
-      next(err);
-    }
+    } catch (e) { next(e); }
   },
 
+  // GET /api/mercadorias/:id
   async findById(req, res, next) {
     try {
       const id = Number(req.params.id);
       const item = await prisma.mercadoria.findUnique({
         where: { id },
-        include: { fotos: true },
+        include: { fotos: true }
       });
-      if (!item) return res.status(404).json({ error: 'Não encontrada' });
+      if (!item) return res.status(404).json({ error: 'Mercadoria não encontrada' });
       res.json(item);
-    } catch (err) {
-      next(err);
-    }
+    } catch (e) { next(e); }
   },
 
+  // POST /api/mercadorias (com multer.array('fotos',5))
   async create(req, res, next) {
     try {
-      const { nome, valorUnitario, quantidadeEstoque, descricao } = req.body;
-      // cria registro base
+      const { nome, descricao, valorUnitario, quantidadeEstoque } = req.body;
       const nova = await prisma.mercadoria.create({
         data: {
           nome,
-          valorUnitario: parseFloat(valorUnitario),
-          quantidadeEstoque: parseInt(quantidadeEstoque),
           descricao,
-        },
+          valorUnitario: parseFloat(valorUnitario),
+          quantidadeEstoque: parseInt(quantidadeEstoque)
+        }
       });
-      // prepara pasta destino
+
+      // pasta de destino das fotos
       const dest = path.join(__dirname, '../../uploads/produtos', String(nova.id));
       if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
 
-      // processa cada arquivo
+      // grava cada foto no disco e registra no BD
       const fotosData = [];
       (req.files || []).slice(0, 5).forEach(file => {
-        const destPath = path.join(dest, file.filename);
-        fs.renameSync(file.path, destPath);
-        fotosData.push({ mercadoriaId: nova.id, path: `/uploads/produtos/${nova.id}/${file.filename}` });
+        const ext = path.extname(file.originalname);
+        const filename = file.filename + ext;
+        const fullPath = path.join(dest, filename);
+        fs.renameSync(file.path, fullPath);
+        fotosData.push({ mercadoriaId: nova.id, caminho: `/uploads/produtos/${nova.id}/${filename}` });
       });
       if (fotosData.length) {
         await prisma.foto.createMany({ data: fotosData });
       }
 
-      // retorna registro completo
       const completa = await prisma.mercadoria.findUnique({
         where: { id: nova.id },
-        include: { fotos: true },
+        include: { fotos: true }
       });
       res.status(201).json(completa);
-    } catch (err) {
-      next(err);
-    }
+    } catch (e) { next(e); }
   },
 
+  // PUT /api/mercadorias/:id (sem regravar todas fotos)
   async update(req, res, next) {
     try {
       const id = Number(req.params.id);
-      const { nome, valorUnitario, quantidadeEstoque, descricao } = req.body;
-      const updated = await prisma.mercadoria.update({
+      const { nome, descricao, valorUnitario, quantidadeEstoque } = req.body;
+      const upd = await prisma.mercadoria.update({
         where: { id },
         data: {
           nome,
-          valorUnitario: parseFloat(valorUnitario),
-          quantidadeEstoque: parseInt(quantidadeEstoque),
           descricao,
-        },
+          valorUnitario: parseFloat(valorUnitario),
+          quantidadeEstoque: parseInt(quantidadeEstoque)
+        }
       });
-      res.json(updated);
-    } catch (err) {
-      next(err);
-    }
+      res.json(upd);
+    } catch (e) { next(e); }
   },
 
+  // DELETE /api/mercadorias/:id (remove fotos e BD)
   async remove(req, res, next) {
     try {
       const id = Number(req.params.id);
@@ -93,8 +91,6 @@ module.exports = {
       await prisma.foto.deleteMany({ where: { mercadoriaId: id } });
       await prisma.mercadoria.delete({ where: { id } });
       res.status(204).send();
-    } catch (err) {
-      next(err);
-    }
+    } catch (e) { next(e); }
   },
 };

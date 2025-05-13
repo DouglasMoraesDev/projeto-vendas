@@ -1,9 +1,11 @@
-// src/controllers/comprovanteController.js
+// Gera PDF e lista comprovantes
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const gerarPdfRecibo = require('../utils/pdfGenerator');
+const path = require('path');
 
 module.exports = {
-  // Lista todos os comprovantes de um cliente
+  // GET /api/comprovantes?clienteId=#
   async findByCliente(req, res, next) {
     try {
       const clienteId = Number(req.query.clienteId);
@@ -15,15 +17,38 @@ module.exports = {
           }
         }
       });
-      // extrai apenas comprovantes
-      const comprovantes = vendas.flatMap(v =>
+      const comps = vendas.flatMap(v =>
         v.parcelas
-          .filter(p => p.comprovante)
-          .map(p => ({ parcelaId: p.id, ...p.comprovante }))
+         .filter(p => p.comprovante)
+         .map(p => p.comprovante)
       );
-      res.json(comprovantes);
-    } catch (err) {
-      next(err);
-    }
+      res.json(comps);
+    } catch (e) { next(e); }
+  },
+
+  // GET /api/comprovantes/:parcelaId/pdf
+  async pdfByParcela(req, res, next) {
+    try {
+      const parcelaId = Number(req.params.parcelaId);
+      const parcela = await prisma.parcela.findUnique({
+        where: { id: parcelaId },
+        include: { venda: { include: { cliente: true } }, comprovante: true }
+      });
+      if (!parcela || !parcela.comprovante) {
+        return res.status(404).json({ error: 'Comprovante não encontrado' });
+      }
+      const pdfBuf = await gerarPdfRecibo({
+        clienteNome: parcela.venda.cliente.nome,
+        parcelaNum: parcela.numParcela,
+        valor: parcela.valorParcela,
+        dataPagamento: parcela.dataPagamento,
+        recebidoPor: parcela.comprovante.recebidoPor
+      });
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename=recibo_parcela_${parcelaId}.pdf`
+      });
+      res.send(pdfBuf);
+    } catch (e) { next(e); }
   }
 };

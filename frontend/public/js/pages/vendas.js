@@ -1,73 +1,80 @@
-// src/pages/vendas.js
+// vendas.js
 import { api } from '../api.js';
 
 export function vendasPage() {
   return {
     template() {
       return `
-        <h2>Vendas</h2>
+        <h2>Registrar Venda</h2>
         <form id="form-venda">
-          <select name="clienteId" required></select>
-          <select name="mercadoriaId" required></select>
-          <label>
-            Pagamento:
+          <label>Cliente:
+            <select name="clienteId" required></select>
+          </label>
+          <label>Mercadoria:
+            <select name="mercadoriaId" required></select>
+          </label>
+          <label>Quantidade:
+            <input name="quantidade" type="number" min="1" value="1" required/>
+          </label>
+          <label>Pagamento:
             <select name="tipoPagamento">
               <option value="avista">À vista</option>
               <option value="parcelado">Parcelado</option>
             </select>
           </label>
           <div id="parcelamento" style="display:none">
-            <input name="entrada"     type="number" step="0.01" placeholder="Entrada"/>
-            <input name="numParcelas" type="number"      placeholder="Nº parcelas"/>
+            <label>Entrada:      <input name="entrada" type="number" step="0.01"></label>
+            <label>Nº Parcelas:  <input name="numParcelas" type="number" min="1"></label>
           </div>
-          <button type="submit">Registrar Venda</button>
+          <button>Enviar</button>
         </form>
+        <h3>Vendas Recentes</h3>
         <ul id="lista-vendas"></ul>
       `;
     },
     async init() {
       const form = document.getElementById('form-venda');
-      const selCliente    = form.clienteId;
-      const selMercadoria = form.mercadoriaId;
-      // carrega opções
-      (await api.getClientes()).data.forEach(c =>
-        selCliente.add(new Option(c.nome, c.id))
-      );
+      const selCli = form.clienteId;
+      const selMer = form.mercadoriaId;
+
+      (await api.getClientes()).data.forEach(c => selCli.add(new Option(c.nome, c.id)));
       (await api.getMercadorias()).data.forEach(m =>
-        selMercadoria.add(new Option(m.nome, m.id))
+        selMer.add(new Option(`${m.nome} (R$${m.valorUnitario.toFixed(2)})`, m.id))
       );
-      // toggle de parcelamento
+
       form.tipoPagamento.onchange = e => {
         document.getElementById('parcelamento').style.display =
           e.target.value === 'parcelado' ? 'block' : 'none';
       };
+
       form.onsubmit = async e => {
         e.preventDefault();
-        try {
-          const data = {
-            clienteId: form.clienteId.value,
-            mercadoriaId: form.mercadoriaId.value,
-            tipoPagamento: form.tipoPagamento.value,
-            entrada: form.entrada.value,
-            numParcelas: form.numParcelas.value
-          };
-          await api.createVenda(data);
-          this.load();
-        } catch (err) {
-          alert(err.response?.data?.error || err.message);
-        }
+        const data = {
+          clienteId: Number(form.clienteId.value),
+          itens: [{
+            mercadoriaId: Number(form.mercadoriaId.value),
+            quantidade:   Number(form.quantidade.value)
+          }],
+          tipoPagamento: form.tipoPagamento.value,
+          entrada:       form.entrada.value,
+          numParcelas:   form.numParcelas.value
+        };
+        await api.createVenda(data);
+        form.reset();
+        this.load();
       };
-      await this.load();
+
+      this.load();
     },
     async load() {
       const ul = document.getElementById('lista-vendas');
-      ul.innerHTML = 'Carregando…';
-      const res = await api.getVendas();
-      ul.innerHTML = res.data.map(v =>
-        `<li>
-           #${v.id} • ${v.cliente.nome} • ${v.tipoPagamento} • R$${v.valorTotal.toFixed(2)}
-         </li>`
-      ).join('');
+      const vendas = (await api.getVendas()).data;
+      ul.innerHTML = vendas.map(v => `
+        <li>
+          #${v.id} • ${new Date(v.criadoEm).toLocaleString()} • 
+          ${v.cliente.nome} • R$${v.valorTotal.toFixed(2)} • ${v.tipoPagamento}
+        </li>
+      `).join('');
     }
   };
 }

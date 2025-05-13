@@ -1,4 +1,4 @@
-// src/pages/dashboard.js
+// dashboard.js
 export function dashboardPage() {
   return {
     template() {
@@ -10,6 +10,7 @@ export function dashboardPage() {
           <a href="#/vendas">Vendas</a> |
           <a href="#/parcelas">Parcelas</a> |
           <a href="#/historico">Histórico</a> |
+          <a href="#/comprovantes">Comprovantes</a> |
           <a href="#/loja">Loja</a> |
           <button id="btn-logout">Sair</button>
         </nav>

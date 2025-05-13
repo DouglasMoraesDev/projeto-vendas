@@ -1,9 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,77 +8,96 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model User {
+// Usuário do sistema (quem faz login)
+model Usuario {
   id        Int      @id @default(autoincrement())
   nome      String
   email     String   @unique
-  telefone  String
+  telefone  String?
   endereco  String?
   senha     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  criadoEm  DateTime @default(now())
 }
 
+// Clientes para quem se vende
 model Cliente {
   id        Int      @id @default(autoincrement())
   nome      String
-  telefone  String
   cpf       String   @unique
+  telefone  String
   endereco  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  vendas    Venda[]  // todas as vendas realizadas por este cliente
+  vendas    Venda[]  // 1 cliente → N vendas
 }
 
+// Mercadorias que podem ser vendidas
 model Mercadoria {
-  id               Int       @id @default(autoincrement())
+  id               Int           @id @default(autoincrement())
   nome             String
+  descricao        String?
   valorUnitario    Float
   quantidadeEstoque Int
-  descricao        String?
-  fotos            Foto[]
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  fotos            Foto[]        // 1 mercadoria → N fotos
+  itensVenda       ItemVenda[]   // ligação com Venda
 }
 
+// Fotos das mercadorias (até 5 por mercadoria)
 model Foto {
   id           Int         @id @default(autoincrement())
   mercadoria   Mercadoria  @relation(fields: [mercadoriaId], references: [id])
   mercadoriaId Int
-  path         String
+  caminho      String      // ex: "/uploads/produtos/1/img.jpg"
 }
 
+// Venda efetuada (à vista ou parcelada)
 model Venda {
-  id               Int        @id @default(autoincrement())
-  cliente          Cliente    @relation(fields: [clienteId], references: [id])
+  id               Int            @id @default(autoincrement())
+  cliente          Cliente        @relation(fields: [clienteId], references: [id])
   clienteId        Int
-  dataVenda        DateTime   @default(now())
-  tipoPagamento    String     // "avista" ou "parcelado"
   valorTotal       Float
-  entrada          Float?     // só se parcelado
-  numParcelas      Int?
-  parcelasRestantes Int?
-  parcelas         Parcela[]
+  tipoPagamento    TipoPagamento
+  entrada          Float?         // somente se parcelado
+  numParcelas      Int?           // somente se parcelado
+  parcelasRestantes Int?          // decrementa a cada pagamento
+  criadoEm         DateTime       @default(now())
+  itens            ItemVenda[]    // produtos incluídos
+  parcelas         Parcela[]      // geração automática
 }
 
+// Item de venda: produto + quantidade
+model ItemVenda {
+  id             Int         @id @default(autoincrement())
+  venda          Venda       @relation(fields: [vendaId], references: [id])
+  vendaId        Int
+  mercadoria     Mercadoria  @relation(fields: [mercadoriaId], references: [id])
+  mercadoriaId   Int
+  quantidade     Int
+  precoUnitario  Float       // cópia de valorUnitario no momento da venda
+}
+
+// Parcelas de vendas parceladas
 model Parcela {
-  id             Int      @id @default(autoincrement())
-  venda          Venda    @relation(fields: [vendaId], references: [id])
+  id             Int         @id @default(autoincrement())
+  venda          Venda       @relation(fields: [vendaId], references: [id])
   vendaId        Int
   numParcela     Int
   valorParcela   Float
   dataVencimento DateTime
-  pago           Boolean  @default(false)
+  pago           Boolean     @default(false)
   dataPagamento  DateTime?
   comprovante    Comprovante?
 }
 
+// Comprovante PDF / arquivo enviado no pagamento
 model Comprovante {
-  id           Int      @id @default(autoincrement())
-  parcela      Parcela  @relation(fields: [parcelaId], references: [id])
-  parcelaId    Int      @unique  // garante que cada parcela só tenha 1 comprovante
-  arquivoPath  String
-  dataUpload   DateTime @default(now())
+  id           Int       @id @default(autoincrement())
+  parcela      Parcela   @relation(fields: [parcelaId], references: [id])
+  parcelaId    Int
+  caminho      String    // ex: "/uploads/comprovantes/123/recibo.pdf"
   recebidoPor  String
+  criadoEm     DateTime  @default(now())
+}
+
+enum TipoPagamento {
+  AVISTA
+  PARCELADO
 }
