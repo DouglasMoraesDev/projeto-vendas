@@ -1,4 +1,3 @@
-// src/app.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -56,8 +55,8 @@ const frontendDir = path.join(__dirname, '../../frontend/public');
 app.use(express.static(frontendDir));
 
 // fallback para SPA: qualquer rota não-API retorna o index.html
-app.get('*', (req, res) => {
-  // se for rota da API, passa adiante
+// agora compatível com Express 5 – usamos parâmetro “catch-all” nomeado
+app.get('/:path(.*)', (req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API route not found' });
   }

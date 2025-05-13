@@ -1,5 +1,3 @@
-# nixpacks.toml
-
 # Instala dependências de backend e frontend
 [phases.setup]
 commands = [
