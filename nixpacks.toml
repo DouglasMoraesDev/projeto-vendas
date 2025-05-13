@@ -1,19 +1,21 @@
 # nixpacks.toml
+
+# Fase de setup: instala dependências de backend e frontend
 [phases.setup]
 commands = [
-  # Instala o backend
+  # Backend
   "cd backend && npm install",
-  # Instala o frontend (serve)
+  # Frontend (serve)
   "cd frontend && npm install"
 ]
 
+# Fase de build: gera o Prisma Client
 [phases.build]
 commands = [
-  # Geração Prisma (sem build JS)
   "cd backend && npx prisma generate"
-  # Se o frontend tiver build (ex: React/Vite), adicione aqui
+  # Se você tiver um passo de build no frontend (ex: Vite), adicione aqui
 ]
 
+# Fase de start: inicia somente o backend, que também serve o frontend
 [phases.start]
-# Comando único que roda o backend; frontend será servido pelo backend em /public
 command = "cd backend && npm start"
