@@ -47,6 +47,7 @@ app.use('/api/comprovantes', authMiddleware, comprovanteRoutes);
 
 // --------------------
 // SERVIR FRONTEND ESTÁTICO
+// --------------------
 const frontendDir = path.join(__dirname, '../../frontend/public');
 app.use(express.static(frontendDir));
 

@@ -1,5 +1,5 @@
 // src/pages/loja.js
-import { api } from '../services/api.js';
+import { api } from '../api.js';
 
 export function lojaPage() {
   return {

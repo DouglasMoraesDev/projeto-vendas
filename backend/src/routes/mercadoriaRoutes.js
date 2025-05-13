@@ -1,4 +1,3 @@
-// src/routes/mercadoriaRoutes.js
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -13,7 +12,7 @@ const upload = multer({
 router.get('/',    ctrl.findAll);
 router.get('/:id', ctrl.findById);
 router.post('/',   upload.array('fotos', 5), ctrl.create);
-router.put('/:id', ctrl.update);
+router.put('/:id', upload.array('fotos', 5), ctrl.update);
 router.delete('/:id', ctrl.remove);
 
 module.exports = router;

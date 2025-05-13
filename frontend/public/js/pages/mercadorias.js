@@ -1,6 +1,6 @@
 // src/pages/mercadorias.js
-import { api } from '../services/api.js';
-import { MercadoriaCard } from '../components/MercadoriaCard.js';
+import { api } from '../api.js';
+import { MercadoriaCard } from './components/MercadoriaCard.js';
 
 export function mercadoriasPage() {
   return {

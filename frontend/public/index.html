@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gerenciador de Vendas</title>
+  <meta charset="UTF-8" />
+  <title>Sistema de Vendas</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <div id="app"></div>
 
-  <!-- Importa o Axios via CDN ESM -->
-  <script type="module">
-    import axios from 'https://cdn.jsdelivr.net/npm/axios/dist/axios.esm.min.js';
-    import { initApp } from './src/main.js';
-
-    // inicializa sua aplicação passando o axios como parâmetro
-    initApp(axios);
-  </script>
+  <!-- Ordem importa -->
+  <script src="js/api.js"></script>
+  <script src="js/pages/login.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/clientes.js"></script>
+  <script src="js/pages/mercadorias.js"></script>
+  <script src="js/pages/vendas.js"></script>
+  <script src="js/pages/parcelas.js"></script>
+  <script src="js/pages/comprovantes.js"></script>
+  <script src="js/pages/loja.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
