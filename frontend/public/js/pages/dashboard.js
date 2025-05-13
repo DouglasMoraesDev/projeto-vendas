@@ -5,13 +5,13 @@ export function dashboardPage() {
       return `
         <h1>Dashboard</h1>
         <nav>
-          <a href="#/clientes">Clientes</a> |
-          <a href="#/mercadorias">Mercadorias</a> |
-          <a href="#/vendas">Vendas</a> |
-          <a href="#/parcelas">Parcelas</a> |
-          <a href="#/historico">Histórico</a> |
-          <a href="#/comprovantes">Comprovantes</a> |
-          <a href="#/loja">Loja</a> |
+          <a href="#/clientes">Clientes</a> 
+          <a href="#/mercadorias">Mercadorias</a> 
+          <a href="#/vendas">Vendas</a> 
+          <a href="#/parcelas">Parcelas</a> 
+          <a href="#/historico">Histórico</a> 
+          <a href="#/comprovantes">Comprovantes</a> 
+          <a href="#/loja">Loja</a> 
           <button id="btn-logout">Sair</button>
         </nav>
       `;
