@@ -47,16 +47,11 @@ app.use('/api/comprovantes', authMiddleware, comprovanteRoutes);
 
 // --------------------
 // SERVIR FRONTEND ESTÁTICO
-// --------------------
 const frontendDir = path.join(__dirname, '../../frontend/public');
 app.use(express.static(frontendDir));
 
-// fallback SPA: usa parâmetro nomeado com modificador `*`
-// para capturar zero ou mais segmentos, sem parênteses
-app.get('/:path*', (req, res) => {
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'API route not found' });
-  }
+// fallback SPA: qualquer rota que NÃO comece com "/api/"
+app.get(/^(?!\/api\/).*/, (req, res) => {
   res.sendFile(path.join(frontendDir, 'index.html'));
 });
 
