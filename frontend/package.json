@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "serve -s public -l 5000",
+    "start": "serve public -l 5000",
     "build": "vite build",
     "preview": "vite preview"
   },

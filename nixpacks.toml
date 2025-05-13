@@ -1,0 +1,19 @@
+# nixpacks.toml
+[phases.setup]
+commands = [
+  # Instala o backend
+  "cd backend && npm install",
+  # Instala o frontend (serve)
+  "cd frontend && npm install"
+]
+
+[phases.build]
+commands = [
+  # Geração Prisma (sem build JS)
+  "cd backend && npx prisma generate"
+  # Se o frontend tiver build (ex: React/Vite), adicione aqui
+]
+
+[phases.start]
+# Comando único que roda o backend; frontend será servido pelo backend em /public
+command = "cd backend && npm start"
