@@ -67,7 +67,7 @@ app.use((err, req, res, next) => {
 });
 
 // --------------------
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO DO SERVIDOR
 // --------------------
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
