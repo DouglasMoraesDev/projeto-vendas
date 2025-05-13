@@ -9,8 +9,7 @@ module.exports = (req, res, next) => {
   if (!token) return res.status(401).json({ error: 'Token não fornecido' });
 
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    req.user = payload; // { userId, email, iat, exp }
+    req.user = jwt.verify(token, JWT_SECRET);
     next();
   } catch {
     res.status(401).json({ error: 'Token inválido' });

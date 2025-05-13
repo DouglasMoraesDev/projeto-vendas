@@ -3,61 +3,56 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 module.exports = {
-  // Listar todos os clientes
   async findAll(req, res, next) {
     try {
-      const clientes = await prisma.cliente.findMany();
-      res.json(clientes);
+      const list = await prisma.cliente.findMany();
+      res.json(list);
     } catch (err) {
       next(err);
     }
   },
 
-  // Buscar um cliente por ID
   async findById(req, res, next) {
     try {
-      const { id } = req.params;
-      const cliente = await prisma.cliente.findUnique({ where: { id: Number(id) } });
-      if (!cliente) return res.status(404).json({ error: 'Cliente não encontrado' });
-      res.json(cliente);
+      const id = Number(req.params.id);
+      const item = await prisma.cliente.findUnique({ where: { id } });
+      if (!item) return res.status(404).json({ error: 'Cliente não encontrado' });
+      res.json(item);
     } catch (err) {
       next(err);
     }
   },
 
-  // Criar novo cliente
   async create(req, res, next) {
     try {
       const { nome, telefone, cpf, endereco } = req.body;
-      const novo = await prisma.cliente.create({
-        data: { nome, telefone, cpf, endereco }
+      const nova = await prisma.cliente.create({
+        data: { nome, telefone, cpf, endereco },
       });
-      res.status(201).json(novo);
+      res.status(201).json(nova);
     } catch (err) {
       next(err);
     }
   },
 
-  // Atualizar cliente
   async update(req, res, next) {
     try {
-      const { id } = req.params;
+      const id = Number(req.params.id);
       const { nome, telefone, cpf, endereco } = req.body;
-      const atualizado = await prisma.cliente.update({
-        where: { id: Number(id) },
-        data: { nome, telefone, cpf, endereco }
+      const updated = await prisma.cliente.update({
+        where: { id },
+        data: { nome, telefone, cpf, endereco },
       });
-      res.json(atualizado);
+      res.json(updated);
     } catch (err) {
       next(err);
     }
   },
 
-  // Deletar cliente
   async remove(req, res, next) {
     try {
-      const { id } = req.params;
-      await prisma.cliente.delete({ where: { id: Number(id) } });
+      const id = Number(req.params.id);
+      await prisma.cliente.delete({ where: { id } });
       res.status(204).send();
     } catch (err) {
       next(err);
