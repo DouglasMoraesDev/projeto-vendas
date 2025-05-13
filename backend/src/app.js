@@ -17,8 +17,8 @@ const app = express();
 // --------------------
 // MIDDLEWARES GLOBAIS
 // --------------------
-app.use(cors({ origin: '*' }));      // CORS aberto para testes
-app.use(express.json());             // receber JSON no body
+app.use(cors({ origin: '*' }));
+app.use(express.json());
 
 // --------------------
 // SERVIR UPLOADS
@@ -29,17 +29,15 @@ app.use(
 );
 
 // --------------------
-// ROTAS DE API PÚBLICAS
+// ROTAS PÚBLICAS
 // --------------------
-// health-check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
 });
-// autenticação
 app.use('/api/auth', authRoutes);
 
 // --------------------
-// ROTAS DE API PROTEGIDAS
+// ROTAS PROTEGIDAS
 // --------------------
 app.use('/api/clientes',     authMiddleware, clienteRoutes);
 app.use('/api/mercadorias',  authMiddleware, mercadoriaRoutes);
@@ -50,13 +48,12 @@ app.use('/api/comprovantes', authMiddleware, comprovanteRoutes);
 // --------------------
 // SERVIR FRONTEND ESTÁTICO
 // --------------------
-// tudo que estiver em frontend/public será servido em "/"
 const frontendDir = path.join(__dirname, '../../frontend/public');
 app.use(express.static(frontendDir));
 
-// fallback para SPA: qualquer rota não-API retorna o index.html
-// agora compatível com Express 5 – usamos parâmetro “catch-all” nomeado
-app.get('/:path(.*)', (req, res) => {
+// fallback SPA: usa parâmetro nomeado com modificador `*`
+// para capturar zero ou mais segmentos, sem parênteses
+app.get('/:path*', (req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API route not found' });
   }
@@ -75,7 +72,7 @@ app.use((err, req, res, next) => {
 });
 
 // --------------------
-// INICIALIZAÇÃO DO SERVIDOR
+// INICIALIZAÇÃO
 // --------------------
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
