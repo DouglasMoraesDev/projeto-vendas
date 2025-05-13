@@ -1,11 +1,10 @@
 // src/app.js
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-// importar roteadores
+// roteadores
 const authRoutes        = require('./routes/authRoutes');
 const clienteRoutes     = require('./routes/clienteRoutes');
 const mercadoriaRoutes  = require('./routes/mercadoriaRoutes');
@@ -19,36 +18,30 @@ const app = express();
 // --------------------
 // MIDDLEWARES GLOBAIS
 // --------------------
-
-// Permite chamadas de qualquer origem (CORS)
-// Em produção, restrinja ao domínio do frontend
-app.use(cors({ origin: '*' }));
-
-// Parse application/json
-app.use(express.json());
+app.use(cors({ origin: '*' }));      // CORS aberto para testes
+app.use(express.json());             // receber JSON no body
 
 // --------------------
 // SERVIR UPLOADS
 // --------------------
-// Arquivos enviados (produtos e comprovantes)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, '../uploads'))
+);
 
 // --------------------
-// ROTAS PÚBLICAS (API)
+// ROTAS DE API PÚBLICAS
 // --------------------
-
-// Health-check
+// health-check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
 });
-
-// Autenticação
+// autenticação
 app.use('/api/auth', authRoutes);
 
 // --------------------
-// ROTAS PROTEGIDAS (JWT)
+// ROTAS DE API PROTEGIDAS
 // --------------------
-// Prefixo /api para diferenciar do frontend estático
 app.use('/api/clientes',     authMiddleware, clienteRoutes);
 app.use('/api/mercadorias',  authMiddleware, mercadoriaRoutes);
 app.use('/api/vendas',       authMiddleware, vendaRoutes);
@@ -58,13 +51,17 @@ app.use('/api/comprovantes', authMiddleware, comprovanteRoutes);
 // --------------------
 // SERVIR FRONTEND ESTÁTICO
 // --------------------
-// Todo arquivo em frontend/public será servido em /
-const frontendPath = path.join(__dirname, '../../frontend/public');
-app.use(express.static(frontendPath));
+// tudo que estiver em frontend/public será servido em "/"
+const frontendDir = path.join(__dirname, '../../frontend/public');
+app.use(express.static(frontendDir));
 
-// Para qualquer outra rota não API, retorna o index.html (SPA fallback)
+// fallback para SPA: qualquer rota não-API retorna o index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+  // se for rota da API, passa adiante
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  res.sendFile(path.join(frontendDir, 'index.html'));
 });
 
 // --------------------

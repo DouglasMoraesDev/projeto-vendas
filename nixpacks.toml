@@ -3,9 +3,7 @@
 # Fase de setup: instala dependências de backend e frontend
 [phases.setup]
 commands = [
-  # Backend
   "cd backend && npm install",
-  # Frontend (serve)
   "cd frontend && npm install"
 ]
 
@@ -13,9 +11,11 @@ commands = [
 [phases.build]
 commands = [
   "cd backend && npx prisma generate"
-  # Se você tiver um passo de build no frontend (ex: Vite), adicione aqui
+  # Se tiver build do frontend, ex: "cd frontend && npm run build"
 ]
 
 # Fase de start: inicia somente o backend, que também serve o frontend
 [phases.start]
-command = "cd backend && npm start"
+commands = [
+  "cd backend && npm start"
+]
