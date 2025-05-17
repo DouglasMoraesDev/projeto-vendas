@@ -1,42 +1,41 @@
-# Base image
+# --- Base Image --------------------------------------------------
 FROM node:18 AS base
 WORKDIR /app
 
-# === Frontend build stage ===
+# --- Frontend Build ------------------------------------------------
 FROM base AS frontend-build
 WORKDIR /app/frontend
 
-# Instala dependências do frontend (cache em package.json)
+# Cache de deps
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install
 
-# Copia todo o código-fonte e faz o build
+# Copy source e build
 COPY frontend/ ./
 RUN npm run build
 
-# === Backend build stage ===
+# --- Backend Build -------------------------------------------------
 FROM base AS backend-build
 WORKDIR /app/backend
 
-# Instala dependências do backend (cache em package.json)
+# Cache de deps
 COPY backend/package.json backend/package-lock.json ./
 RUN npm install
 
-# Copia todo o código-fonte e gera o client Prisma + migrações
+# Copy source e rodar Prisma
 COPY backend/ ./
 RUN npx prisma generate && npx prisma migrate deploy
 
-# === Imagem final de runtime ===
+# --- Final Runtime Image ------------------------------------------
 FROM node:18 AS runner
 WORKDIR /app
 
-# Copia assets estáticos do frontend já buildados
+# Copia build do frontend
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
-# Copia o backend completo (código + node_modules + prisma)
+# Copia backend (app + node_modules + Prisma client)
 COPY --from=backend-build /app/backend ./backend
 
-# Define diretório de trabalho, expõe porta e startup
 WORKDIR /app/backend
 EXPOSE 3000
 CMD ["node", "server.js"]
