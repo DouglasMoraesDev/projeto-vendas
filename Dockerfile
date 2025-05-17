@@ -1,29 +1,32 @@
-# 1. Base image
-FROM node:18
-
-# 2. Diretório de trabalho
+FROM node:18 AS base
 WORKDIR /app
 
-# 3. Copia só os package.json e instala deps do backend
-COPY backend/package.json backend/package-lock.json* ./backend/
-RUN cd backend && npm install
+# Frontend build stage
+FROM base AS frontend-build
+WORKDIR /app/frontend
+# Install dependencies (cache on package.json only)
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm install
+# Copy all frontend source and build
+COPY frontend/ ./
+RUN npm run build
 
-# 4. Copia só os package.json e instala deps do frontend
-COPY frontend/package.json frontend/package-lock.json* ./frontend/
-RUN cd frontend && npm install
+# Backend build stage\ nFROM base AS backend-build
+WORKDIR /app/backend
+COPY backend/package.json backend/package-lock.json ./
+RUN npm install
+COPY backend/ ./
+# Generate Prisma client and apply migrations
+RUN npx prisma generate && npx prisma migrate deploy
 
-# 5. Build do frontend (gera /app/frontend/dist)
-RUN cd frontend && npm run build
+# Final runtime image
+FROM node:18 AS runner
+WORKDIR /app
+# Copy built frontend
+COPY --from=frontend-build /app/frontend/dist ./frontend/dist
+# Copy backend with node_modules and prisma
+COPY --from=backend-build /app/backend ./backend
 
-# 6. Copia o restante do código (incluindo src/, uploads, prisma schema etc.)
-COPY backend ./backend
-COPY frontend ./frontend
-
-# 7. Gera client Prisma e aplica migrations
-RUN cd backend && npx prisma generate && npx prisma migrate deploy
-
-# 8. Expõe a porta configurada (4000)
-EXPOSE 4000
-
-# 9. Inicia o servidor Express
-CMD ["node", "backend/src/app.js"]
+WORKDIR /app/backend
+EXPOSE 3000
+CMD [ "node", "server.js" ]
