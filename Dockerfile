@@ -1,43 +1,21 @@
-# --- Base Image --------------------------------------------------
-FROM node:18 AS base
+# Imagem base para runtime
+FROM node:18
+
 WORKDIR /app
 
-# --- Frontend Build Stage ---------------------------------------
-FROM base AS frontend-build
-WORKDIR /app/frontend
+# 1) Copia o frontend já buildado
+COPY frontend/dist ./frontend/dist
 
-# Cache de deps: usa npm ci com jobs limitados a 1 e modo silencioso
-COPY frontend/package.json frontend/package-lock.json ./
-RUN npm config set jobs 1 \
- && npm ci --silent
-
-# Copia fonte e faz build
-COPY frontend/ ./
-RUN npm run build
-
-# --- Backend Build Stage ----------------------------------------
-FROM base AS backend-build
-WORKDIR /app/backend
-
-# Cache de deps: usa npm ci com jobs limitados a 1 e modo silencioso
+# 2) Instala só as deps de produção do backend
 COPY backend/package.json backend/package-lock.json ./
-RUN npm config set jobs 1 \
- && npm ci --silent
+RUN npm ci --production --silent
 
-# Copia fonte e gera Prisma + migrações
+# 3) Copia o restante do backend
 COPY backend/ ./
-RUN npx prisma generate && npx prisma migrate deploy
 
-# --- Final Runtime Image ----------------------------------------
-FROM node:18 AS runner
-WORKDIR /app
+# 4) Gera o Prisma Client
+RUN npx prisma generate
 
-# Copia frontend buildado
-COPY --from=frontend-build /app/frontend/dist ./frontend/dist
-
-# Copia backend pronto (código + node_modules + Prisma client)
-COPY --from=backend-build /app/backend ./backend
-
-WORKDIR /app/backend
+# 5) Exponha a porta e defina o comando de start
 EXPOSE 3000
 CMD ["node", "server.js"]
