@@ -1,18 +1,15 @@
-# Instala dependências de backend e frontend
-[phases.setup]
-commands = [
+[build]
+builder = "NIXPACKS"
+
+[build.nixpacks]
+phases.setup.commands = [
   "cd backend && npm install",
   "cd frontend && npm install"
 ]
-
-# Gera o Prisma Client e aplica migrations em produção
-[phases.build]
-commands = [
+phases.build.commands = [
+  "cd frontend && npm run build",
   "cd backend && npx prisma generate && npx prisma migrate deploy"
 ]
-
-# Inicia o backend (que já serve o diretório frontend/public)
-[phases.start]
-commands = [
+phases.start.commands = [
   "cd backend && npm start"
 ]
