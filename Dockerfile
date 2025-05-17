@@ -1,26 +1,29 @@
-# 1) Use Node 18 como base
+# 1. Base image
 FROM node:18
 
-# 2) Crie diretório de trabalho
+# 2. Diretório de trabalho
 WORKDIR /app
 
-# 3) Copie e instale só as deps do backend
+# 3. Copia só os package.json e instala deps do backend
 COPY backend/package.json backend/package-lock.json* ./backend/
 RUN cd backend && npm install
 
-# 4) Copie e instale só as deps do frontend
+# 4. Copia só os package.json e instala deps do frontend
 COPY frontend/package.json frontend/package-lock.json* ./frontend/
 RUN cd frontend && npm install
 
-# 5) Copie todo o código do backend e do frontend (incluindo a pasta public)
+# 5. Build do frontend (gera /app/frontend/dist)
+RUN cd frontend && npm run build
+
+# 6. Copia o restante do código (incluindo src/, uploads, prisma schema etc.)
 COPY backend ./backend
 COPY frontend ./frontend
 
-# 6) Gere o Prisma Client e aplique migrations
+# 7. Gera client Prisma e aplica migrations
 RUN cd backend && npx prisma generate && npx prisma migrate deploy
 
-# 7) Exponha a porta de execução (use a mesma que você configurou: 4000)
+# 8. Expõe a porta configurada (4000)
 EXPOSE 4000
 
-# 8) Inicia o seu app
+# 9. Inicia o servidor Express
 CMD ["node", "backend/src/app.js"]
