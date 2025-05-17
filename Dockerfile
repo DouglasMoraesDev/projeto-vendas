@@ -6,11 +6,12 @@ WORKDIR /app
 FROM base AS frontend-build
 WORKDIR /app/frontend
 
-# Instala dependências do frontend (cache em package.json)
+# Cache de deps: usa npm ci com jobs limitados a 1 e modo silencioso
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci --silent
+RUN npm config set jobs 1 \
+ && npm ci --silent
 
-# Copia todo o código-fonte e faz o build
+# Copia fonte e faz build
 COPY frontend/ ./
 RUN npm run build
 
@@ -18,12 +19,12 @@ RUN npm run build
 FROM base AS backend-build
 WORKDIR /app/backend
 
-# Instala dependências do backend com menor consumo de memória
+# Cache de deps: usa npm ci com jobs limitados a 1 e modo silencioso
 COPY backend/package.json backend/package-lock.json ./
 RUN npm config set jobs 1 \
-  && npm ci --silent
+ && npm ci --silent
 
-# Copia todo o código-fonte e gera o client Prisma + aplica migrações
+# Copia fonte e gera Prisma + migrações
 COPY backend/ ./
 RUN npx prisma generate && npx prisma migrate deploy
 
@@ -31,10 +32,10 @@ RUN npx prisma generate && npx prisma migrate deploy
 FROM node:18 AS runner
 WORKDIR /app
 
-# Copia build do frontend
+# Copia frontend buildado
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
-# Copia backend completo (código + node_modules + Prisma client)
+# Copia backend pronto (código + node_modules + Prisma client)
 COPY --from=backend-build /app/backend ./backend
 
 WORKDIR /app/backend
