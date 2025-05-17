@@ -34,7 +34,7 @@ WORKDIR /app
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
 # Copia o backend completo (código + node_modules + prisma)
-COPY --from=backend-build  /app/backend        ./backend
+COPY --from=backend-build /app/backend ./backend
 
 # Define diretório de trabalho, expõe porta e startup
 WORKDIR /app/backend
