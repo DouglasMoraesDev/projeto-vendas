@@ -1,8 +1,7 @@
-// app.js – ponto de entrada do backend
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const path = require('path');
+const cors    = require('cors');
+const path    = require('path');
 
 // Rotas
 const authRoutes        = require('./routes/authRoutes');
@@ -21,15 +20,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Servir uploads estáticos 
+// Ajuste o path para apontar para a pasta correta de uploads (do root do projeto)
+const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+app.use('/uploads', express.static(uploadsDir));
 
-// Servir uploads estáticos
-app.use('/uploads',
-   express.static(path.join(__dirname, '../uploads'))
-   );
-// Rota de health-check
-app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
+// Health-check
+app.get('/api/health', (req, res) =>
+  res.json({ status: 'OK', timestamp: new Date() })
+);
 
-// Rotas públicas
+// Rotas públicas de auth
 app.use('/api/auth', authRoutes);
 
 // Rotas protegidas
@@ -39,8 +40,8 @@ app.use('/api/vendas',       authMiddleware, vendaRoutes);
 app.use('/api/parcelas',     authMiddleware, parcelaRoutes);
 app.use('/api/comprovantes', authMiddleware, comprovanteRoutes);
 
-// Fallback para frontend (SPA)
-const frontendDir = path.join(__dirname, '../../frontend/public');
+// Servir SPA (front-end) do diretório public
+const frontendDir = path.resolve(__dirname, '../../frontend/public');
 app.use(express.static(frontendDir));
 app.get(/^(?!\/api\/).*/, (req, res) => {
   res.sendFile(path.join(frontendDir, 'index.html'));

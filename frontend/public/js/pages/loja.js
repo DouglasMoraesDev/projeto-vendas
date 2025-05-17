@@ -1,4 +1,3 @@
-// loja.js
 import { api } from '../api.js';
 
 export function lojaPage() {
@@ -20,8 +19,9 @@ export function lojaPage() {
       div.querySelectorAll('button').forEach(btn => {
         btn.onclick = () => {
           const m = res.data.find(x => x.id == btn.dataset.id);
-          const texto = encodeURIComponent(`Olá, tenho interesse em: ${m.nome} (R$${m.valorUnitario.toFixed(2)})`);
-          // seu telefone fixo/quadro no link
+          const texto = encodeURIComponent(
+            `Olá, tenho interesse em: ${m.nome} (R$${m.valorUnitario.toFixed(2)})`
+          );
           window.open(`https://wa.me/SEU_TELEFONE?text=${texto}`, '_blank');
         };
       });

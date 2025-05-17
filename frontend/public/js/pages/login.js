@@ -1,4 +1,3 @@
-// login.js
 import { api } from '../api.js';
 
 export function loginPage() {
@@ -20,12 +19,11 @@ export function loginPage() {
       form.onsubmit = async e => {
         e.preventDefault();
         err.textContent = '';
-        const data = {
-          email: form.email.value,
-          senha: form.senha.value
-        };
         try {
-          const res = await api.login(data);
+          const res = await api.login({
+            email: form.email.value,
+            senha: form.senha.value
+          });
           localStorage.setItem('token', res.data.token);
           location.hash = '#/dashboard';
         } catch (e) {

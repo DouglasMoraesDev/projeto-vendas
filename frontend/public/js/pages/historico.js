@@ -1,5 +1,18 @@
-import { api } from './api.js';
-const BACKEND = 'http://localhost:4000';
+import { api, API_HOST } from '../api.js';
+
+export function historicoPage() {
+  return {
+    template() {
+      return `
+        <h1>Histórico de Vendas</h1>
+        <ul id="hist-list"></ul>
+      `;
+    },
+    init() {
+      loadHistorico();
+    }
+  };
+}
 
 async function loadHistorico() {
   const ul = document.getElementById('hist-list');
@@ -7,12 +20,14 @@ async function loadHistorico() {
   ul.innerHTML = vendas.map(v => {
     const fotos = v.itens.map(item =>
       item.mercadoria.fotos
-        .map(f => `<img src="${BACKEND}${f.caminho}" width="50">`)
+        .map(f => `<img src="${API_HOST}${f.caminho}" width="50" onerror="this.src='placeholder.jpg'">`)
         .join('')
     ).join('');
+
     const parcelas = v.parcelas
       .map(p => `#${p.numParcela} (${p.pago ? 'Pago' : 'Aberto'})`)
       .join('; ');
+
     return `
       <li>
         <strong>#${v.id}</strong> • ${new Date(v.criadoEm).toLocaleString()} • ${v.cliente.nome}<br>
@@ -24,5 +39,3 @@ async function loadHistorico() {
     `;
   }).join('');
 }
-
-window.addEventListener('DOMContentLoaded', loadHistorico);
