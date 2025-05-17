@@ -12,7 +12,7 @@ export function lojaPage() {
         <div class="card">
           <h4>${m.nome}</h4>
           <p>R$${m.valorUnitario.toFixed(2)}</p>
-          ${m.fotos.map(f => `<img src="${f.caminho}" width="80">`).join('')}
+          ${m.fotos.map(f => `<img src="/uploads/${f.caminho}" width="80">`).join('')}
           <button data-id="${m.id}">Conversar</button>
         </div>
       `).join('');
