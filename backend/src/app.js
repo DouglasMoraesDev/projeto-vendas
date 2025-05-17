@@ -41,7 +41,7 @@ app.use('/api/parcelas',     authMiddleware, parcelaRoutes);
 app.use('/api/comprovantes', authMiddleware, comprovanteRoutes);
 
 // Servir SPA (front-end) do diretório public
-const frontendDir = path.resolve(__dirname, '../../frontend/public');
+const frontendDir = path.resolve(__dirname, '../../frontend/dist');
 app.use(express.static(frontendDir));
 app.get(/^(?!\/api\/).*/, (req, res) => {
   res.sendFile(path.join(frontendDir, 'index.html'));

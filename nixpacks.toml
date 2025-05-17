@@ -2,14 +2,19 @@
 builder = "NIXPACKS"
 
 [build.nixpacks]
-phases.setup.commands = [
+[build.nixpacks.phases.setup]
+commands = [
   "cd backend && npm install",
   "cd frontend && npm install"
 ]
-phases.build.commands = [
+
+[build.nixpacks.phases.build]
+commands = [
   "cd frontend && npm run build",
   "cd backend && npx prisma generate && npx prisma migrate deploy"
 ]
-phases.start.commands = [
+
+[build.nixpacks.phases.start]
+commands = [
   "cd backend && npm start"
 ]
