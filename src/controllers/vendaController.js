@@ -178,7 +178,7 @@ module.exports = {
           tipoPagamento: tipoPagamento ? tipoPagamento.toUpperCase() : undefined,
           entrada: entrada !== undefined ? parseFloat(entrada) : undefined,
           numParcelas: numParcelas !== undefined ? Number(numParcelas) : undefined,
-          // Não atualiza itens nem recalcula estoque aqui
+          // Não alteramos itens nem recalculamos estoque aqui
         }
       });
       return res.json(upd);
@@ -189,12 +189,37 @@ module.exports = {
 
   // ----------------------------
   // DELETE /api/vendas/:id
-  // Remove a venda do banco (e associações de itens/parcelas em cascade, se configurado)
+  // Remove uma venda e todas as entidades dependentes (comprovantes, parcelas, itens)
   // ----------------------------
   async remove(req, res, next) {
     try {
       const id = Number(req.params.id);
+
+      // 1) Buscar todas as parcelas da venda
+      const parcelas = await prisma.parcela.findMany({
+        where: { vendaId: id }
+      });
+
+      // 2) Para cada parcela, excluir o comprovante associado (se existir)
+      for (const p of parcelas) {
+        await prisma.comprovante.deleteMany({
+          where: { parcelaId: p.id }
+        });
+      }
+
+      // 3) Excluir todas as parcelas da venda
+      await prisma.parcela.deleteMany({
+        where: { vendaId: id }
+      });
+
+      // 4) Excluir todos os itens de venda
+      await prisma.itemVenda.deleteMany({
+        where: { vendaId: id }
+      });
+
+      // 5) Finalmente, excluir a própria venda
       await prisma.venda.delete({ where: { id } });
+
       return res.status(204).send();
     } catch (e) {
       next(e);

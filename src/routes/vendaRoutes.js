@@ -16,7 +16,7 @@ router.get('/:id', ctrl.findById);
 // Atualiza venda por ID (edição básica)
 router.put('/:id', ctrl.update);
 
-// Exclui venda por ID
+// Exclui venda por ID (remove também itens, parcelas e comprovantes)
 router.delete('/:id', ctrl.remove);
 
 module.exports = router;
