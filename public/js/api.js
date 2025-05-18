@@ -159,22 +159,15 @@ export async function atualizarProduto(id, dados) {
   return resp.json();
 }
 
-export async function excluirVenda(id) {
+export async function excluirProduto(id) {
   const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/vendas/${id}`, {
+  const resp = await fetch(`${BASE_URL}/api/mercadorias/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!resp.ok) {
-    // Tenta ler JSON; se não for JSON, cai no catch e usa statusText
-    let erroMsg = `Erro ao excluir venda (status ${resp.status})`;
-    try {
-      const erroJson = await resp.json();
-      erroMsg = erroJson.error || erroMsg;
-    } catch {
-      // resposta não é JSON: mantém mensagem genérica
-    }
-    throw new Error(erroMsg);
+    const erroJson = await resp.json();
+    throw new Error(erroJson.error || "Erro ao excluir produto");
   }
   return;
 }
