@@ -1,10 +1,11 @@
+<!-- public/dashboard.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <div class="container">
@@ -19,12 +20,20 @@
       <a href="index.html" id="logout">Logout</a>
     </nav>
 
-    <h1>Bem‐vindo ao Gerenciador de Vendas</h1>
-    <p>Use o menu acima para navegar pelas funcionalidades.</p>
+    <h1>Dashboard</h1>
+
+    <div id="resumoDashboard">
+      <p>Total de Clientes: <span id="totalClientes">0</span></p>
+      <p>Total de Produtos: <span id="totalProdutos">0</span></p>
+      <p>Total de Vendas: <span id="totalVendas">0</span></p>
+    </div>
+
+    <h2>Notificações de Parcelas</h2>
+    <div id="notificacoes"></div>
   </div>
 
+  <script type="module" src="js/dashboard.js"></script>
   <script>
-    // Botão logout: remove token e volta para login
     document.getElementById("logout").addEventListener("click", () => {
       localStorage.removeItem("token");
     });

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nova Venda</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <div class="container">
@@ -37,24 +37,25 @@
       <input type="text" id="valorUnitario" name="valorUnitario" readonly />
 
       <label>Tipo de Pagamento:</label>
-      <label><input type="radio" name="tipoPagamento" value="avista" checked /> À Vista</label>
-      <label><input type="radio" name="tipoPagamento" value="parcelado" /> Parcelado</label>
+      <label><input type="radio" name="tipoPagamento" value="AVISTA" checked /> À Vista</label>
+      <label><input type="radio" name="tipoPagamento" value="PARCELADO" /> Parcelado</label>
 
       <div id="dadosParcelamento" style="display: none;">
         <label for="entrada">Entrada (R$):</label>
-        <input type="number" step="0.01" id="entrada" name="entrada" />
+        <input type="text" id="entrada" name="entrada" placeholder="1.000,00" />
 
         <label for="quantParcelas">Número de Parcelas:</label>
-        <input type="number" id="quantParcelas" name="quantParcelas" />
+        <input type="number" id="quantParcelas" name="quantParcelas" min="1" />
+
+        <!-- Aqui mostramos o valor de cada parcela e datas de vencimento -->
+        <div id="infoParcelas"></div>
       </div>
 
       <button type="submit">Registrar Venda</button>
     </form>
   </div>
 
-  <!-- Carrega script de vendas -->
   <script type="module" src="js/vendas.js"></script>
-
   <script>
     document.getElementById("logout").addEventListener("click", () => {
       localStorage.removeItem("token");

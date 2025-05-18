@@ -1,4 +1,3 @@
-// schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -31,13 +30,13 @@ model Cliente {
 
 // Mercadorias que podem ser vendidas
 model Mercadoria {
-  id               Int           @id @default(autoincrement())
-  nome             String
-  descricao        String?
-  valorUnitario    Float
+  id                Int           @id @default(autoincrement())
+  nome              String
+  descricao         String?
+  valorUnitario     Float
   quantidadeEstoque Int
-  fotos            Foto[]        // 1 mercadoria → N fotos
-  itensVenda       ItemVenda[]   // ligação com Venda
+  fotos             Foto[]        // 1 mercadoria → N fotos
+  itensVenda        ItemVenda[]   // relação com Venda
 }
 
 // Fotos das mercadorias (até 5 por mercadoria)
@@ -50,28 +49,30 @@ model Foto {
 
 // Venda efetuada (à vista ou parcelada)
 model Venda {
-  id               Int            @id @default(autoincrement())
-  cliente          Cliente        @relation(fields: [clienteId], references: [id])
-  clienteId        Int
-  valorTotal       Float
-  tipoPagamento    TipoPagamento
-  entrada          Float?         // somente se parcelado
-  numParcelas      Int?           // somente se parcelado
-  parcelasRestantes Int?          // decrementa a cada pagamento
-  criadoEm         DateTime       @default(now())
-  itens            ItemVenda[]    // produtos incluídos
-  parcelas         Parcela[]      // geração automática
+  id                Int            @id @default(autoincrement())
+  cliente           Cliente        @relation(fields: [clienteId], references: [id])
+  clienteId         Int
+  valorTotal        Float
+  tipoPagamento     TipoPagamento
+  entrada           Float?         // somente se parcelado
+  numParcelas       Int?           // somente se parcelado
+  parcelasRestantes Int?           // decrementa a cada pagamento
+  produtoNome       String?        // ← torna opcional (nullable)
+  criadoEm          DateTime       @default(now())
+  itens             ItemVenda[]    // produtos incluídos
+  parcelas          Parcela[]      // geração automática
 }
 
 // Item de venda: produto + quantidade
 model ItemVenda {
-  id             Int         @id @default(autoincrement())
-  venda          Venda       @relation(fields: [vendaId], references: [id])
-  vendaId        Int
-  mercadoria     Mercadoria  @relation(fields: [mercadoriaId], references: [id])
-  mercadoriaId   Int
-  quantidade     Int
-  precoUnitario  Float       // cópia de valorUnitario no momento da venda
+  id              Int         @id @default(autoincrement())
+  venda           Venda       @relation(fields: [vendaId], references: [id])
+  vendaId         Int
+  mercadoria      Mercadoria  @relation(fields: [mercadoriaId], references: [id])
+  mercadoriaId    Int
+  nomeMercadoria  String?     // ← torna opcional (nullable)
+  quantidade      Int
+  precoUnitario   Float       // cópia de valorUnitario no momento da venda
 }
 
 // Parcelas de vendas parceladas
@@ -91,7 +92,7 @@ model Parcela {
 model Comprovante {
   id           Int       @id @default(autoincrement())
   parcela      Parcela   @relation(fields: [parcelaId], references: [id])
-  parcelaId    Int       @unique      // Garante relação 1:1
+  parcelaId    Int       @unique      // relação 1:1 com Parcela
   caminho      String    // ex: "/uploads/comprovantes/123/recibo.pdf"
   recebidoPor  String
   criadoEm     DateTime  @default(now())
