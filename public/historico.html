@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Histórico de Vendas</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <h1>Histórico de Vendas</h1>
-  <ul id="hist-list"></ul>
-  <a href="dashboard.html">← Voltar</a>
+  <div class="container">
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="produtos.html">Produtos</a>
+      <a href="vendas.html">Nova Venda</a>
+      <a href="controleParcelas.html">Parcelas</a>
+      <a href="comprovantes.html">Comprovantes</a>
+      <a href="loja.html">Loja</a>
+      <a href="index.html" id="logout">Logout</a>
+    </nav>
 
+    <h1>Histórico de Vendas</h1>
+    <div id="historicoContainer"></div>
+  </div>
+
+  <!-- Carrega script de histórico -->
   <script type="module" src="js/historico.js"></script>
+
+  <script>
+    document.getElementById("logout").addEventListener("click", () => {
+      localStorage.removeItem("token");
+    });
+  </script>
 </body>
 </html>

@@ -2,25 +2,55 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clientes</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <h1>Clientes</h1>
-  
-  <button id="btn-novo">Novo Cliente</button>
-  <form id="form-cliente" style="display:none">
-    <label>Nome:     <input name="nome" required></label>
-    <label>CPF:      <input name="cpf" required></label>
-    <label>Telefone: <input name="telefone" required></label>
-    <label>Endereço: <input name="endereco"></label>
-    <button type="submit">Salvar</button>
-    <button type="button" id="btn-cancel">Cancelar</button>
-  </form>
-  
-  <ul id="lista-clientes"></ul>
-  
-  <!-- include como módulo ES -->
+  <div class="container">
+    <!-- Menu superior -->
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="produtos.html">Produtos</a>
+      <a href="vendas.html">Nova Venda</a>
+      <a href="historico.html">Histórico</a>
+      <a href="controleParcelas.html">Parcelas</a>
+      <a href="comprovantes.html">Comprovantes</a>
+      <a href="loja.html">Loja</a>
+      <a href="index.html" id="logout">Logout</a>
+    </nav>
+
+    <h1>Gerenciar Clientes</h1>
+
+    <!-- Formulário para cadastrar/editar cliente -->
+    <div id="erroCliente" class="erro"></div>
+    <form id="formCliente">
+      <label for="nome">Nome:</label>
+      <input type="text" id="nome" name="nome" required />
+
+      <label for="cpf">CPF:</label>
+      <input type="text" id="cpf" name="cpf" required />
+
+      <label for="telefone">Telefone:</label>
+      <input type="text" id="telefone" name="telefone" />
+
+      <label for="endereco">Endereço:</label>
+      <input type="text" id="endereco" name="endereco" />
+
+      <button type="submit">Cadastrar Cliente</button>
+    </form>
+
+    <!-- Lista de clientes em cards -->
+    <div id="listaClientes"></div>
+  </div>
+
+  <!-- Carrega script de clientes -->
   <script type="module" src="js/clientes.js"></script>
+
+  <script>
+    document.getElementById("logout").addEventListener("click", () => {
+      localStorage.removeItem("token");
+    });
+  </script>
 </body>
 </html>

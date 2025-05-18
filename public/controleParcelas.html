@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Comprovantes</title>
+  <title>Controle de Parcelas</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -14,25 +14,17 @@
       <a href="produtos.html">Produtos</a>
       <a href="vendas.html">Nova Venda</a>
       <a href="historico.html">Histórico</a>
-      <a href="controleParcelas.html">Parcelas</a>
+      <a href="comprovantes.html">Comprovantes</a>
       <a href="loja.html">Loja</a>
       <a href="index.html" id="logout">Logout</a>
     </nav>
 
-    <h1>Comprovantes por Cliente</h1>
-    <div id="erroComprovantes" class="erro"></div>
-
-    <label for="selectClienteComprovantes">Selecione Cliente:</label>
-    <select id="selectClienteComprovantes">
-      <option value="">-- Selecione --</option>
-    </select>
-    <button id="btnBuscarComprovantes">Buscar</button>
-
-    <div id="listaComprovantes"></div>
+    <h1>Controle de Parcelas Pendentes</h1>
+    <div id="listaParcelas"></div>
   </div>
 
-  <!-- Carrega script de comprovantes -->
-  <script type="module" src="js/comprovantes.js"></script>
+  <!-- Carrega script de parcelas -->
+  <script type="module" src="js/parcelas.js"></script>
 
   <script>
     document.getElementById("logout").addEventListener("click", () => {

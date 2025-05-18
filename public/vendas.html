@@ -1,38 +1,64 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <link rel="stylesheet" href="css/style.css">
-  <title>Vendas</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nova Venda</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <h1>Registrar Venda</h1>
-  <form id="form-venda">
-    <label>Cliente:
-      <select name="clienteId" required></select>
-    </label>
-    <label>Mercadoria:
-      <select name="mercadoriaId" required></select>
-    </label>
-    <label>Quantidade:
-      <input name="quantidade" type="number" min="1" value="1" required/>
-    </label>
-    <label>Pagamento:
-      <select name="tipoPagamento">
-        <option value="avista">À vista</option>
-        <option value="parcelado">Parcelado</option>
-      </select>
-    </label>
-    <div id="parcelamento" style="display:none">
-      <label>Entrada:     <input name="entrada" type="number" step="0.01"></label>
-      <label>Nº Parcelas: <input name="numParcelas" type="number" min="1"></label>
-    </div>
-    <button>Enviar</button>
-  </form>
+  <div class="container">
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="produtos.html">Produtos</a>
+      <a href="historico.html">Histórico</a>
+      <a href="controleParcelas.html">Parcelas</a>
+      <a href="comprovantes.html">Comprovantes</a>
+      <a href="loja.html">Loja</a>
+      <a href="index.html" id="logout">Logout</a>
+    </nav>
 
-  <h3>Vendas Recentes</h3>
-  <ul id="lista-vendas"></ul>
-  <a href="dashboard.html">← Voltar</a>
+    <h1>Nova Venda</h1>
+    <div id="erroVenda" class="erro"></div>
+
+    <form id="formVenda">
+      <label for="selectCliente">Cliente:</label>
+      <select id="selectCliente" name="selectCliente" required>
+        <option value="">-- Selecione --</option>
+      </select>
+
+      <label for="selectProduto">Produto:</label>
+      <select id="selectProduto" name="selectProduto" required>
+        <option value="">-- Selecione --</option>
+      </select>
+
+      <label for="valorUnitario">Valor Unitário (R$):</label>
+      <input type="text" id="valorUnitario" name="valorUnitario" readonly />
+
+      <label>Tipo de Pagamento:</label>
+      <label><input type="radio" name="tipoPagamento" value="avista" checked /> À Vista</label>
+      <label><input type="radio" name="tipoPagamento" value="parcelado" /> Parcelado</label>
+
+      <div id="dadosParcelamento" style="display: none;">
+        <label for="entrada">Entrada (R$):</label>
+        <input type="number" step="0.01" id="entrada" name="entrada" />
+
+        <label for="quantParcelas">Número de Parcelas:</label>
+        <input type="number" id="quantParcelas" name="quantParcelas" />
+      </div>
+
+      <button type="submit">Registrar Venda</button>
+    </form>
+  </div>
+
+  <!-- Carrega script de vendas -->
   <script type="module" src="js/vendas.js"></script>
+
+  <script>
+    document.getElementById("logout").addEventListener("click", () => {
+      localStorage.removeItem("token");
+    });
+  </script>
 </body>
 </html>

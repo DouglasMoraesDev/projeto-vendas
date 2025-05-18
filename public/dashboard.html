@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <h1>Dashboard</h1>
-  <nav>
-    <a href="clientes.html">Clientes</a> |
-    <a href="mercadorias.html">Mercadorias</a> |
-    <a href="vendas.html">Vendas</a> |
-    <a href="parcelas.html">Parcelas</a> |
-    <a href="historico.html">Histórico</a> |
-    <a href="comprovantes.html">Comprovantes</a> |
-    <a href="loja.html">Loja</a>
-  </nav>
-  <button id="btn-logout">Sair</button>
+  <div class="container">
+    <nav>
+      <a href="clientes.html">Clientes</a>
+      <a href="produtos.html">Produtos</a>
+      <a href="vendas.html">Nova Venda</a>
+      <a href="historico.html">Histórico de Vendas</a>
+      <a href="controleParcelas.html">Controle de Parcelas</a>
+      <a href="comprovantes.html">Comprovantes</a>
+      <a href="loja.html">Loja Pública</a>
+      <a href="index.html" id="logout">Logout</a>
+    </nav>
 
-  <script type="module" src="js/dashboard.js"></script>
+    <h1>Bem‐vindo ao Gerenciador de Vendas</h1>
+    <p>Use o menu acima para navegar pelas funcionalidades.</p>
+  </div>
+
+  <script>
+    // Botão logout: remove token e volta para login
+    document.getElementById("logout").addEventListener("click", () => {
+      localStorage.removeItem("token");
+    });
+  </script>
 </body>
 </html>
