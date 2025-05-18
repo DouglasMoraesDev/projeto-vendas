@@ -3,6 +3,8 @@ import {
   getClientes,
   getProdutos,
   criarVenda,
+  getVendaById,
+  atualizarVenda
 } from "./api.js";
 
 const selectCliente = document.getElementById("selectCliente");
@@ -12,45 +14,79 @@ const tipoPagamentoRadios = document.querySelectorAll("input[name='tipoPagamento
 const divParcelamento = document.getElementById("dadosParcelamento");
 const formVenda = document.getElementById("formVenda");
 const erroVenda = document.getElementById("erroVenda");
-const infoParcelas = document.getElementById("infoParcelas"); // para mostrar valor e datas de vencimento
+const infoParcelas = document.getElementById("infoParcelas");
+const tituloVenda = document.getElementById("tituloVenda");
+const btnSubmitVenda = document.getElementById("btnSubmitVenda");
 
 let listaProdutosCache = [];
 let listaClientesCache = [];
+let modoEdicao = false;
+let vendaEditId = null;
 
-// Formata número para “R$ 1.234,56”
+// Converte “1.234,56” → 1234.56
+function parseMoedaBr(valorStr) {
+  return parseFloat(valorStr.replace(/\./g, "").replace(",", ".")) || 0;
+}
+
+// Formata R$ 1.234,56
 function formatarMoedaBr(valor) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 }
 
-// Converte string “1.234,56” para float 1234.56
-function parseMoedaBr(valorStr) {
-  return parseFloat(valorStr.replace(/\./g, '').replace(',', '.')) || 0;
+// Carrega selects de cliente e produto
+async function carregarOpcoes() {
+  listaClientesCache = await getClientes();
+  listaProdutosCache = await getProdutos();
+  listaClientesCache.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.nome;
+    selectCliente.appendChild(opt);
+  });
+  listaProdutosCache.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = p.nome;
+    selectProduto.appendChild(opt);
+  });
 }
 
-// Carrega clientes e produtos nos selects
-async function carregarOpcoes() {
-  try {
-    listaClientesCache = await getClientes();
-    listaProdutosCache = await getProdutos();
+// Se vier “?edit=<id>”, preenche o formulário
+async function verificarModoEdicao() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("edit")) {
+    modoEdicao = true;
+    vendaEditId = params.get("edit");
+    tituloVenda.textContent = `Editar Venda #${vendaEditId}`;
+    btnSubmitVenda.textContent = "Atualizar Venda";
 
-    listaClientesCache.forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.id;
-      opt.textContent = c.nome;
-      selectCliente.appendChild(opt);
-    });
-    listaProdutosCache.forEach(p => {
-      const opt = document.createElement("option");
-      opt.value = p.id;
-      opt.textContent = p.nome;
-      selectProduto.appendChild(opt);
-    });
-  } catch (err) {
-    console.error(err);
+    try {
+      const v = await getVendaById(vendaEditId);
+      // Preenche cliente e produto
+      selectCliente.value = v.clienteId;
+      // Se a venda tiver vários itens, pega o primeiro
+      const item = (v.itens && v.itens.length > 0) ? v.itens[0] : null;
+      if (item) {
+        selectProduto.value = item.mercadoriaId;
+        valorUnit.value = formatarMoedaBr(item.precoUnitario);
+      }
+      // Preenche tipo de pagamento
+      document.querySelector(`input[name="tipoPagamento"][value="${v.tipoPagamento}"]`).checked = true;
+      if (v.tipoPagamento === "PARCELADO") {
+        divParcelamento.style.display = "block";
+        document.getElementById("entrada").value = v.entrada.toFixed(2).replace(".", ",");
+        document.getElementById("quantParcelas").value = v.numParcelas;
+        // Dispara o cálculo das parcelas para mostrar infoParcelas
+        formVenda.dispatchEvent(new Event("input"));
+      }
+    } catch (err) {
+      alert("Erro ao carregar venda: " + err.message);
+      window.location.href = "historico.html";
+    }
   }
 }
 
-// Ao mudar produto, exibe o valor já formatado
+// Ao mudar produto, atualiza valorUnitário
 selectProduto?.addEventListener("change", () => {
   const id = selectProduto.value;
   if (!id) {
@@ -63,7 +99,7 @@ selectProduto?.addEventListener("change", () => {
   }
 });
 
-// Quando muda tipo “À vista” x “Parcelado”, mostra/oculta campos
+// Mostrar/ocultar campos de parcelamento
 tipoPagamentoRadios.forEach(radio => {
   radio.addEventListener("change", () => {
     if (radio.value === "PARCELADO" && radio.checked) {
@@ -75,7 +111,7 @@ tipoPagamentoRadios.forEach(radio => {
   });
 });
 
-// A cada input dentro do form, recalcula e mostra valor de cada parcela + datas
+// Recalcula valor e datas das parcelas conforme input
 formVenda?.addEventListener("input", () => {
   const tipo = document.querySelector("input[name='tipoPagamento']:checked")?.value;
   if (tipo === "PARCELADO") {
@@ -86,7 +122,6 @@ formVenda?.addEventListener("input", () => {
     if (!isNaN(valorTotal) && !isNaN(entrada) && !isNaN(numParcelas) && numParcelas > 0) {
       const saldo = valorTotal - entrada;
       const valorParcela = saldo / numParcelas;
-
       const hoje = new Date();
       const diaMes = hoje.getDate();
 
@@ -105,7 +140,7 @@ formVenda?.addEventListener("input", () => {
   }
 });
 
-// Ao submeter formulário, prepara objeto e chama a API
+// Envia formulário (POST ou PUT, dependendo de modoEdicao)
 if (formVenda) {
   formVenda.addEventListener("submit", async e => {
     e.preventDefault();
@@ -149,9 +184,19 @@ if (formVenda) {
     }
 
     try {
-      await criarVenda(dados);
-      alert("Venda cadastrada com sucesso!");
-      formVenda.reset();
+      if (modoEdicao && vendaEditId) {
+        // Apenas atualiza campos básicos (não itens)
+        await atualizarVenda(vendaEditId, {
+          clienteId: Number(clienteId),
+          tipoPagamento,
+          entrada: dados.entrada,
+          numParcelas: dados.numParcelas
+        });
+        alert("Venda atualizada com sucesso!");
+      } else {
+        await criarVenda(dados);
+        alert("Venda cadastrada com sucesso!");
+      }
       window.location.href = "historico.html";
     } catch (err) {
       erroVenda.textContent = err.message;
@@ -160,7 +205,14 @@ if (formVenda) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  carregarOpcoes();
+document.addEventListener("DOMContentLoaded", async () => {
+  // Se não estiver logado, redireciona
+  if (!localStorage.getItem("token")) {
+    window.location.href = "index.html";
+    return;
+  }
+  await carregarOpcoes();
   divParcelamento.style.display = "none";
+  await verificarModoEdicao();
 });
+

@@ -48,5 +48,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderizarLoja(produtos);
   } catch (err) {
     console.error(err);
+    document.body.innerHTML = "<p>Erro ao carregar produtos. Tente fazer login novamente.</p>";
   }
 });

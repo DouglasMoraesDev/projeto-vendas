@@ -106,7 +106,7 @@ export async function excluirCliente(id) {
 export async function getProdutos() {
   const token = localStorage.getItem("token");
   const resp = await fetch(`${BASE_URL}/api/mercadorias`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}` }
   });
   if (!resp.ok) throw new Error("Erro ao buscar produtos");
   return resp.json();
@@ -159,15 +159,22 @@ export async function atualizarProduto(id, dados) {
   return resp.json();
 }
 
-export async function excluirProduto(id) {
+export async function excluirVenda(id) {
   const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/mercadorias/${id}`, {
+  const resp = await fetch(`${BASE_URL}/api/vendas/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!resp.ok) {
-    const erroJson = await resp.json();
-    throw new Error(erroJson.error || "Erro ao excluir produto");
+    // Tenta ler JSON; se não for JSON, cai no catch e usa statusText
+    let erroMsg = `Erro ao excluir venda (status ${resp.status})`;
+    try {
+      const erroJson = await resp.json();
+      erroMsg = erroJson.error || erroMsg;
+    } catch {
+      // resposta não é JSON: mantém mensagem genérica
+    }
+    throw new Error(erroMsg);
   }
   return;
 }
@@ -207,6 +214,39 @@ export async function getVendaById(id) {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!resp.ok) throw new Error("Venda não encontrada");
+  return resp.json();
+}
+
+
+// DELETE /api/vendas/:id
+export async function excluirVenda(id) {
+  const token = localStorage.getItem("token");
+  const resp = await fetch(`${BASE_URL}/api/vendas/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!resp.ok) {
+    const erroJson = await resp.json();
+    throw new Error(erroJson.error || "Erro ao excluir venda");
+  }
+  return;
+}
+
+// PUT /api/vendas/:id   (edição simples)
+export async function atualizarVenda(id, dados) {
+  const token = localStorage.getItem("token");
+  const resp = await fetch(`${BASE_URL}/api/vendas/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(dados),
+  });
+  if (!resp.ok) {
+    const erroJson = await resp.json();
+    throw new Error(erroJson.error || "Erro ao atualizar venda");
+  }
   return resp.json();
 }
 
@@ -270,8 +310,10 @@ export function baixarPdfComprovante(parcelaId) {
 // LOJA (PÚBLICO)
 // ================================
 export async function getProdutosLoja() {
-  // Aqui usamos a mesma rota de listagem de produtos, mas precisaria liberar no backend
-  const resp = await fetch(`${BASE_URL}/api/mercadorias`);
+  const token = localStorage.getItem("token");    // <–– pega o token salvo
+  const resp = await fetch(`${BASE_URL}/api/mercadorias`, {
+    headers: { Authorization: `Bearer ${token}` }  // <–– envia o cabeçalho
+  });
   if (!resp.ok) throw new Error("Erro ao buscar produtos para loja");
   return resp.json();
 }

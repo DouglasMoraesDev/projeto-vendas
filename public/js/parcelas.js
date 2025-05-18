@@ -7,7 +7,7 @@ import {
 
 const containerVendasPendentes = document.getElementById("vendasPendentes");
 
-// Formata para “R$ 1.234,56”
+// Formata R$ 1.234,56
 function formatarMoedaBr(valor) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 }
@@ -19,6 +19,7 @@ async function renderizarVendasPendentes() {
     if (!containerVendasPendentes) return;
     containerVendasPendentes.innerHTML = "";
 
+    // Agrupa parcelas por venda
     const agrupado = {};
     parcelas.forEach(p => {
       if (!agrupado[p.vendaId]) {
@@ -35,22 +36,25 @@ async function renderizarVendasPendentes() {
       divVenda.innerHTML = `
         <h4>Venda #${vendaInfo.id} — Cliente: ${vendaInfo.cliente.nome}</h4>
         <p>Parcelas pendentes: ${grupo.parcelas.length}</p>
-        <button class="verParcelasBtn" data-venda="${vendaInfo.id}">Ver Parcela(s)</button>
+        <button class="toggleParcelasBtn" data-venda="${vendaInfo.id}">Ver Parcela(s)</button>
         <div class="parcelasDetalhes" id="detalhes-${vendaInfo.id}" style="display: none;"></div>
       `;
       containerVendasPendentes.appendChild(divVenda);
     });
 
-    // 2) Ao clicar em “Ver Parcela(s)”, exibe detalhes agrupados
-    document.querySelectorAll(".verParcelasBtn").forEach(btn => {
+    // Click em “Ver Parcela(s)” → abre ou fecha
+    document.querySelectorAll(".toggleParcelasBtn").forEach(btn => {
       btn.addEventListener("click", () => {
         const vendaId = btn.dataset.venda;
         const detalhesDiv = document.getElementById(`detalhes-${vendaId}`);
         if (detalhesDiv.style.display === "none") {
           detalhesDiv.style.display = "block";
+          btn.textContent = "Fechar Parcela(s)";
           mostrarDetalhesParcela(vendaId, agrupado[vendaId].parcelas, detalhesDiv);
         } else {
           detalhesDiv.style.display = "none";
+          btn.textContent = "Ver Parcela(s)";
+          detalhesDiv.innerHTML = ""; // limpa conteúdo
         }
       });
     });
@@ -61,7 +65,7 @@ async function renderizarVendasPendentes() {
 
 // Exibe formulário de pagamento para cada parcela daquela venda
 function mostrarDetalhesParcela(vendaId, parcelas, container) {
-  container.innerHTML = ""; // limpa conteúdo
+  container.innerHTML = ""; // limpa antes de reencher
   parcelas.forEach(p => {
     const form = document.createElement("form");
     form.id = `formPag-${p.id}`;
@@ -92,23 +96,18 @@ function mostrarDetalhesParcela(vendaId, parcelas, container) {
         return;
       }
 
-      // Monta FormData para enviar ao backend
-      const formData = new FormData();
-      formData.append("comprovante", arquivo);
-      formData.append("recebidoPor", recebidoPor);
-
       try {
         await pagarParcela(p.id, { recebidoPor, arquivo });
-        // Abre PDF do recibo (rota pública)
+        // Abre PDF de recibo (rota pública)
         window.open(`${BASE_URL}/api/comprovantes/${p.id}/pdf`, "_blank");
         // Abre WhatsApp com mensagem pronta
         const telefone = p.venda.cliente.telefone.replace(/\D/g, '');
         const nomeCli = p.venda.cliente.nome;
-        const textoWhats = encodeURIComponent(`Olá ${nomeCli}, comprovante da parcela ${p.numParcela}`);
+        const textoWhats = encodeURIComponent(`Olá ${nomeCli}, segue recibo da parcela ${p.numParcela}.`);
         window.open(`https://wa.me/${telefone}?text=${textoWhats}`, "_blank");
 
         alert("Parcela paga com sucesso!");
-        renderizarVendasPendentes(); // atualiza lista
+        renderizarVendasPendentes(); // atualiza a lista inteira
       } catch (err) {
         erroPag.textContent = err.message;
         erroPag.classList.add("visivel");
