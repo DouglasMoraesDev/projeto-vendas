@@ -6,38 +6,46 @@ const containerLoja = document.getElementById("lojaContainer");
 
 // Formata “R$ 1.234,56”
 function formatarMoedaBr(valor) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(valor);
 }
 
-// Para cada produto, vamos renderizar um “carousel” simplificado
+// Para cada produto, renderiza um carrossel simplificado de imagens
 function renderizarLoja(produtos) {
   if (!containerLoja) return;
   containerLoja.innerHTML = "";
 
-  produtos.forEach(p => {
-    // Se houver fotos, vamos criar o HTML das imagens
+  produtos.forEach((p) => {
+    // Monta o HTML das imagens (carrossel)
     let fotosHtml = "";
     if (Array.isArray(p.fotos) && p.fotos.length > 0) {
       p.fotos.forEach((foto, idx) => {
-        // primeira foto recebe a classe “active”
         const classeActive = idx === 0 ? "active" : "";
-        // concatena BASE_URL + caminho
+        // Concatena BASE_URL + foto.caminho para formar a URL completa
         fotosHtml += `
-          <img 
-            src="${BASE_URL}${foto.caminho}" 
-            alt="${p.nome}" 
-            class="${classeActive}" 
+          <img
+            src="${BASE_URL}${foto.caminho}"
+            alt="${p.nome}"
+            class="${classeActive}"
           />
         `;
       });
     } else {
-      // se não houver foto, exibir placeholder vazio
-      fotosHtml = `<img src="https://via.placeholder.com/300x150?text=Sem+Foto" class="active" />`;
+      // Caso não haja fotos, exibe um placeholder
+      fotosHtml = `
+        <img
+          src="https://via.placeholder.com/300x150?text=Sem+Foto"
+          alt="Sem Foto"
+          class="active"
+        />
+      `;
     }
 
+    // Cria o card do produto
     const card = document.createElement("div");
     card.classList.add("card");
-
     card.innerHTML = `
       <div class="gallery-container">
         ${fotosHtml}
@@ -47,16 +55,19 @@ function renderizarLoja(produtos) {
       <h4>${p.nome}</h4>
       <p>${p.descricao || ""}</p>
       <p class="valor-loja">${formatarMoedaBr(p.valorUnitario)}</p>
-      <button class="whatsappBtn" data-id="${p.id}" data-nome="${encodeURIComponent(p.nome)}">
+      <button
+        class="whatsappBtn"
+        data-id="${p.id}"
+        data-nome="${encodeURIComponent(p.nome)}"
+      >
         Conversar
       </button>
     `;
     containerLoja.appendChild(card);
 
-    // ======== lógica do carrossel para ESTE card ========
+    // —————— Lógica do carrossel para este card ——————
     const imgs = card.querySelectorAll(".gallery-container img");
     let currentIndex = 0;
-
     const prevBtn = card.querySelector(".gallery-container .prev");
     const nextBtn = card.querySelector(".gallery-container .next");
 
@@ -71,50 +82,58 @@ function renderizarLoja(produtos) {
       currentIndex = (currentIndex + 1) % imgs.length;
       imgs[currentIndex].classList.add("active");
     });
-    // ======================================================
+    // ————————————————————————————————————————
   });
 
   // Botão “Conversar” abre WhatsApp do visitante → conversa com vendedor
-  document.querySelectorAll(".whatsappBtn").forEach(btn => {
-    btn.addEventListener("click", e => {
+  document.querySelectorAll(".whatsappBtn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
       const nomeProd = decodeURIComponent(e.target.dataset.nome);
-      // O número do vendedor (do seu irmão) é fixo:
+      // Número fixo do vendedor (seu irmão)
       const telefoneVendedor = "5512997610410";
 
-      // Pegamos nome e telefone do visitante, armazenados em localStorage via login da loja:
-      const visitaStr = localStorage.getItem("lojavisitante"); 
-      // esperamos que seja JSON: { id, nome, email, telefone, token }
+      // Recupera dados do visitante no localStorage (armazenados em storeLogin.js)
+      const visitaStr = localStorage.getItem("lojavisitante");
       let visitante = null;
-      if (visitaStr) visitante = JSON.parse(visitaStr);
+      if (visitaStr) {
+        try {
+          visitante = JSON.parse(visitaStr);
+        } catch {
+          visitante = null;
+        }
+      }
 
-      // Montamos mensagem pré-preenchida:
+      // Monta mensagem pré‐preenchida
       const mensagem = visitante
         ? `Olá, sou ${visitante.nome} e me interessei pelo produto "${nomeProd}".`
         : `Tenho interesse no produto "${nomeProd}".`;
 
-      // Janela para abrir no WhatsApp do visitante (web ou app):
-      const url = `https://wa.me/${telefoneVendedor}?text=${encodeURIComponent(mensagem)}`;
+      // Abre o WhatsApp Web no número do vendedor, com a mensagem
+      const url = `https://wa.me/${telefoneVendedor}?text=${encodeURIComponent(
+        mensagem
+      )}`;
       window.open(url, "_blank");
     });
   });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1) Verifica se visitante da loja está logado; se não, redireciona para login da loja:
+  // 1) Verifica se visitante da loja está logado; se não, redireciona para login da loja
   if (!localStorage.getItem("lojavisitante_token")) {
     window.location.href = "storeLogin.html";
     return;
   }
 
-  // 2) Registra visita no backend
-  await fetch(`${BASE_URL}/api/visitas/tick`, { method: "POST" }).catch(console.error);
+  // 2) Registra visita no backend (para contagem de visitas)
+  fetch(`${BASE_URL}/api/visitas/tick`, { method: "POST" }).catch(console.error);
 
-  // 3) Busca produtos e renderiza
+  // 3) Busca produtos públicos da loja e renderiza
   try {
     const produtos = await getProdutosLoja();
     renderizarLoja(produtos);
   } catch (err) {
     console.error(err);
-    document.body.innerHTML = "<p>Erro ao carregar produtos. Faça login novamente.</p>";
+    document.body.innerHTML =
+      "<p>Erro ao carregar produtos. Faça login novamente.</p>";
   }
 });
