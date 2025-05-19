@@ -1,8 +1,9 @@
 // src/app.js
+
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
-const path = require("path");
+const cors    = require("cors");
+const path    = require("path");
 
 const authRoutes        = require("./routes/authRoutes");
 const clienteRoutes     = require("./routes/clienteRoutes");
@@ -15,62 +16,61 @@ const dashboardRoutes   = require("./routes/dashboardRoutes");
 const publicMercadoriaRoutes = require("./routes/publicMercadoriaRoutes");
 const storeAuthRoutes        = require("./routes/storeAuthRoutes");
 const visitaRoutes           = require("./routes/visitaRoutes");
+const comprovanteController  = require("./controllers/comprovanteController");
 
-const comprovanteController = require("./controllers/comprovanteController");
-const authMiddleware        = require("./middlewares/authMiddleware");
+const authMiddleware = require("./middlewares/authMiddleware");
 
 const app = express();
 
-// ─── Middlewares Globais ────────────────────────────────────────────────────
+// ─── (1) Middleware GLOBAL: cors e JSON parser ─────────────────────────────────
 app.use(cors());
 app.use(express.json());
 
-// ─── 1) Expor a pasta "uploads" ANTES de servir o front-end ────────────────
-//     Isso faz com que todo GET /uploads/... retorne o arquivo em "projeto-raiz/uploads/..."
-//     sem nunca cair no catch-all ou no serveStatic do public.
+// ─── (2) Expor a pasta “uploads” ANTES de servir qualquer HTML estático ────────
+//      Qualquer GET /uploads/... vai diretamente ao arquivo em disco.
 const uploadsDir = path.resolve(__dirname, "..", "uploads");
 app.use("/uploads", express.static(uploadsDir));
 
-// ─── 2) Rotas PÚBLICAS DE AUTENTICAÇÃO (admin interno) ─────────────────────
+// ─── (3) Rotas de autenticação (ADMIN) — sem token ─────────────────────────────
 app.use("/api/auth", authRoutes);
 
-// ─── 3) Rotas do dashboard (exigem token de admin) ─────────────────────────
+// ─── (4) Dashboard (ADMIN protegido) ─────────────────────────────────────────
 app.use("/api/dashboard", authMiddleware, dashboardRoutes);
 
-// ─── 4) Rotas protegidas (admin) ───────────────────────────────────────────
-app.use("/api/clientes", authMiddleware, clienteRoutes);
-app.use("/api/mercadorias", authMiddleware, mercadoriaRoutes);
-app.use("/api/vendas", authMiddleware, vendaRoutes);
-app.use("/api/parcelas", authMiddleware, parcelaRoutes);
+// ─── (5) ROTAS PROTEGIDAS (ADMIN) ─────────────────────────────────────────────
+app.use("/api/clientes",     authMiddleware, clienteRoutes);
+app.use("/api/mercadorias",  authMiddleware, mercadoriaRoutes);
+app.use("/api/vendas",       authMiddleware, vendaRoutes);
+app.use("/api/parcelas",     authMiddleware, parcelaRoutes);
 app.use("/api/comprovantes", authMiddleware, comprovanteRoutes);
 
-// ─── 5) Rota pública para baixar PDF de comprovante ────────────────────────
+// ─── (6) Rota pública para baixar PDF de comprovante ──────────────────────────
 app.get(
   "/api/comprovantes/:parcelaId/pdf",
   comprovanteController.pdfByParcela
 );
 
-// ─── 6) Rotas da loja pública (visitas, cadastro visitante, lista de produtos) ─
+// ─── (7) Rotas da LOJA PÚBLICA (visitantes, catálogo público) ─────────────────
 app.use("/api/store", storeAuthRoutes);
 app.use("/api/visitas", visitaRoutes);
 app.use("/api/public", publicMercadoriaRoutes);
 
-// ─── 7) Servir o front-end estático (arquivos HTML/CSS/JS em /public) ──────
+// ─── (8) Servir front-end estático (pasta “public”) ────────────────────────────
 const frontendDir = path.resolve(__dirname, "..", "public");
 app.use(express.static(frontendDir));
 
-// ─── 8) Catch-all: se não bateu nenhuma rota /api nem /uploads nem /static, envia index.html 
-app.get(/^(?!\/api\/).*/, (req, res) => {
+// ─── (9) Catch-all para ROTAS NÃO /api e NÃO /uploads: devolve index.html ─────
+app.get(/^(?!\/api\/|\/uploads\/).*/, (req, res) => {
   res.sendFile(path.join(frontendDir, "index.html"));
 });
 
-// ─── Tratamento genérico de erros ───────────────────────────────────────────
+// ─── (10) Tratamento genérico de erros ─────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: err.message });
 });
 
-// ─── Iniciar servidor ──────────────────────────────────────────────────────
+// ─── (11) Iniciar servidor ────────────────────────────────────────────────────
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Backend rodando na porta ${PORT}`);

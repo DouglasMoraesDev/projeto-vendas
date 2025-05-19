@@ -2,135 +2,145 @@
 
 import {
   getProdutos,
+  criarProduto,
   atualizarProduto,
-  excluirProduto
+  excluirProduto,
+  BASE_URL
 } from "./api.js";
 
 const containerListaProdutos = document.getElementById("listaProdutos");
-const buscaInput = document.getElementById("buscaProduto");
+const formProduto = document.getElementById("formProduto");
+const erroProduto = document.getElementById("erroProduto");
 
-// Formata R$ 1.234,56
+// Formata moeda em BRL
 function formatarMoedaBr(valor) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(valor);
 }
 
-// Converte string do tipo “15.000,00” → float 15000.00
+// Converte “15.000,00” → 15000.00
 function parseMoedaBr(valorStr) {
   return parseFloat(valorStr.replace(/\./g, "").replace(",", ".")) || 0;
 }
 
-let listaProdutosCache = [];
-
-// Carrega lista de produtos do backend e renderiza
 async function carregarLista() {
   try {
     const produtos = await getProdutos();
-    listaProdutosCache = produtos;
-    filtrarERenderizar(produtos);
+    containerListaProdutos.innerHTML = "";
+
+    produtos.forEach((p) => {
+      // Renderiza todas as fotos no card
+      let fotosHtml = "";
+      if (Array.isArray(p.fotos) && p.fotos.length > 0) {
+        fotosHtml = p.fotos
+          .map(
+            (foto) => `
+            <img 
+              src="${BASE_URL}${foto.caminho}"
+              alt="${p.nome}" 
+              width="80" 
+            />
+          `
+          )
+          .join("");
+      }
+
+      const card = document.createElement("div");
+      card.classList.add("card");
+      card.innerHTML = `
+        <div class="fotos-container">${fotosHtml}</div>
+        <h4>${p.nome}</h4>
+        <p>Descrição: ${p.descricao || ""}</p>
+        <p>Valor: ${formatarMoedaBr(p.valorUnitario)}</p>
+        <p>Em estoque: ${p.quantidadeEstoque}</p>
+        <button class="editar-btn" data-id="${p.id}">Editar</button>
+        <button class="excluir-btn" data-id="${p.id}">Excluir</button>
+      `;
+      containerListaProdutos.appendChild(card);
+    });
+
+    // Botões de editar/excluir
+    document.querySelectorAll(".editar-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const id = e.target.dataset.id;
+        preencherFormParaEdicao(id);
+      });
+    });
+    document.querySelectorAll(".excluir-btn").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        if (confirm("Deseja realmente excluir este produto?")) {
+          try {
+            await excluirProduto(id);
+            carregarLista();
+          } catch (err) {
+            alert("Erro ao excluir produto: " + err.message);
+          }
+        }
+      });
+    });
   } catch (err) {
     console.error(err);
   }
 }
 
-// Filtra por nome e renderiza
-function filtrarERenderizar(produtos) {
-  const termo = buscaInput.value.trim().toLowerCase();
-  const filtrados = produtos.filter(p =>
-    p.nome.toLowerCase().includes(termo)
-  );
-  renderizarProdutos(filtrados);
+// Preencher form para edição (faz GET `/api/mercadorias/:id`)
+async function preencherFormParaEdicao(id) {
+  try {
+    const produto = (await getProdutos()).find((p) => p.id == id);
+    if (!produto) throw new Error("Produto não encontrado");
+
+    formProduto.nome.value = produto.nome;
+    formProduto.descricao.value = produto.descricao;
+    formProduto.valor.value = produto.valorUnitario.toFixed(2).replace(".", ",");
+    formProduto.quantidade.value = produto.quantidadeEstoque;
+
+    formProduto.dataset.id = produto.id;
+    formProduto.querySelector("button[type=submit]").textContent = "Atualizar Produto";
+  } catch (err) {
+    alert("Erro: " + err.message);
+  }
 }
 
-// Renderiza os cards dos produtos
-function renderizarProdutos(produtos) {
-  if (!containerListaProdutos) return;
-  containerListaProdutos.innerHTML = "";
+// Envia formulário (criar ou atualizar)
+if (formProduto) {
+  formProduto.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    erroProduto.textContent = "";
+    erroProduto.classList.remove("visivel");
 
-  produtos.forEach(p => {
-    const card = document.createElement("div");
-    card.classList.add("card");
+    const idEdicao = formProduto.dataset.id;
+    const nome = formProduto.nome.value.trim();
+    const descricao = formProduto.descricao.value.trim();
+    const valorUnitario = parseMoedaBr(formProduto.valor.value);
+    const quantidadeEstoque = parseInt(formProduto.quantidade.value) || 0;
+    const fotos = Array.from(formProduto.fotos.files);
 
-    // Renderiza todas as fotos (até 5)
-    let fotosHtml = "";
-    if (Array.isArray(p.fotos) && p.fotos.length > 0) {
-      fotosHtml = p.fotos
-        .map(foto => {
-          return `<img src="${foto.caminho.startsWith('http') ? foto.caminho : foto.caminho}" alt="${p.nome}" />`;
-        })
-        .join("");
+    if (!nome || valorUnitario <= 0 || quantidadeEstoque < 0) {
+      erroProduto.textContent = "Preencha nome, valor e quantidade corretamente.";
+      erroProduto.classList.add("visivel");
+      return;
     }
 
-    card.innerHTML = `
-      <div class="fotos-container">${fotosHtml}</div>
-      <h4>${p.nome}</h4>
-      <p>Descrição: ${p.descricao || ""}</p>
-      <p>Valor: ${formatarMoedaBr(p.valorUnitario)}</p>
-      <p>Em estoque: ${p.quantidadeEstoque}</p>
-      <button class="editar-btn" data-id="${p.id}">Editar</button>
-      <button class="excluir-btn" data-id="${p.id}">Excluir</button>
-    `;
-    containerListaProdutos.appendChild(card);
-  });
-
-  // Associar evento de excluir
-  document.querySelectorAll(".excluir-btn").forEach(btn => {
-    btn.addEventListener("click", async e => {
-      const id = e.target.dataset.id;
-      if (confirm("Deseja realmente excluir este produto?")) {
-        try {
-          await excluirProduto(id);
-          carregarLista();
-        } catch (err) {
-          alert("Erro ao excluir produto: " + err.message);
-        }
+    try {
+      if (idEdicao) {
+        await atualizarProduto(idEdicao, { nome, descricao, valorUnitario, quantidadeEstoque });
+        formProduto.removeAttribute("data-id");
+        formProduto.querySelector("button[type=submit]").textContent = "Cadastrar Produto";
+      } else {
+        await criarProduto({ nome, descricao, valorUnitario, quantidadeEstoque, fotos });
       }
-    });
-  });
-
-  // Associar evento de editar (abre prompt simples para demo)
-  document.querySelectorAll(".editar-btn").forEach(btn => {
-    btn.addEventListener("click", async e => {
-      const id = e.target.dataset.id;
-      const produto = listaProdutosCache.find(p => p.id == id);
-      if (!produto) return alert("Produto não encontrado");
-
-      // Prompt simplificado para editar apenas nome e valor
-      const novoNome = prompt("Novo nome:", produto.nome);
-      if (novoNome === null) return; // cancelou
-
-      const novoValorStr = prompt("Novo valor (Ex: 15.000,00):", produto.valorUnitario.toFixed(2).replace(".", ","));
-      if (novoValorStr === null) return; // cancelou
-      const novoValor = parseMoedaBr(novoValorStr);
-
-      if (!novoNome.trim() || isNaN(novoValor) || novoValor <= 0) {
-        return alert("Dados inválidos.");
-      }
-
-      try {
-        await atualizarProduto(id, {
-          nome: novoNome.trim(),
-          descricao: produto.descricao,
-          valorUnitario: novoValor,
-          quantidadeEstoque: produto.quantidadeEstoque
-        });
-        carregarLista();
-      } catch (err) {
-        alert("Erro ao atualizar: " + err.message);
-      }
-    });
+      formProduto.reset();
+      carregarLista();
+    } catch (err) {
+      erroProduto.textContent = err.message;
+      erroProduto.classList.add("visivel");
+    }
   });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Se não estiver logado, redireciona
-  if (!localStorage.getItem("token")) {
-    window.location.href = "index.html";
-    return;
-  }
   carregarLista();
-
-  // Filtrar conforme digita
-  buscaInput.addEventListener("input", () => {
-    filtrarERenderizar(listaProdutosCache);
-  });
 });
