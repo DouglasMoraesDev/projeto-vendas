@@ -1,5 +1,6 @@
 // public/js/comprovantes.js
-import { getClientes, getComprovantesByCliente } from "./api.js";
+
+import { getClientes, getComprovantesByCliente, BASE_URL } from "./api.js";
 
 const selectCliente = document.getElementById("selectClienteComprovantes");
 const btnBuscar = document.getElementById("btnBuscarComprovantes");
@@ -42,7 +43,7 @@ async function buscarComprovantes() {
   }
 }
 
-// Renderiza lista de comprovantes (links para abrir o PDF)
+// Renderiza lista de comprovantes (link para abrir o arquivo enviado)
 function renderizarComprovantes(comps) {
   if (!listaComprovantesContainer) return;
   listaComprovantesContainer.innerHTML = "";
@@ -55,11 +56,18 @@ function renderizarComprovantes(comps) {
   comps.forEach((c) => {
     const item = document.createElement("div");
     item.classList.add("card");
+
+    // Data formatada (criadoEm vem do backend)
+    const dataFormatada = new Date(c.criadoEm).toLocaleDateString("pt-BR");
+
+    // Aqui, usamos c.caminho para abrir o arquivo (imagem ou PDF) que foi enviado
+    const arquivoUrl = `${BASE_URL}${c.caminho}`;
+
     item.innerHTML = `
-      <p>Venda ID: ${c.vendaId}</p>
-      <a href="${c.caminho}" target="_blank">Ver Comprovante</a>
+      
+      <a href="${arquivoUrl}" target="_blank">Ver Comprovante</a>
       <p>Recebido por: ${c.recebidoPor}</p>
-      <p>Data Upload: ${new Date(c.createdAt).toLocaleDateString()}</p>
+      <p>Data Upload: ${dataFormatada}</p>
     `;
     listaComprovantesContainer.appendChild(item);
   });

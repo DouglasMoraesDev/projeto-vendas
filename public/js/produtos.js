@@ -1,5 +1,11 @@
 // public/js/produtos.js
-import { getProdutos, criarProduto, atualizarProduto, excluirProduto } from "./api.js";
+import {
+  getProdutos,
+  criarProduto,
+  atualizarProduto,
+  excluirProduto,
+  BASE_URL
+} from "./api.js";
 
 const containerListaProdutos = document.getElementById("listaProdutos");
 const formProduto = document.getElementById("formProduto");
@@ -8,6 +14,11 @@ const erroProduto = document.getElementById("erroProduto");
 // Formata R$ 1.234,56
 function formatarMoedaBr(valor) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+}
+
+// Converte string do tipo “15.000,00” → float 15000.00
+function parseMoedaBr(valorStr) {
+  return parseFloat(valorStr.replace(/\./g, "").replace(",", ".")) || 0;
 }
 
 async function carregarLista() {
@@ -20,11 +31,15 @@ async function carregarLista() {
       const card = document.createElement("div");
       card.classList.add("card");
 
-      // Renderiza todas as fotos (até 5)
+      // Renderiza todas as fotos (até 5), prefixando com BASE_URL
       let fotosHtml = "";
       if (Array.isArray(p.fotos) && p.fotos.length > 0) {
         fotosHtml = p.fotos
-          .map(foto => `<img src="${foto.caminho}" alt="${p.nome}" width="80" />`)
+          .map(foto => {
+            // foto.caminho, ex: "/uploads/produtos/1/img.jpg"
+            // então usamos `${BASE_URL}${foto.caminho}`
+            return `<img src="${BASE_URL}${foto.caminho}" alt="${p.nome}" width="80" />`;
+          })
           .join("");
       }
 
@@ -75,8 +90,8 @@ if (formProduto) {
     const idEdicao = formProduto.dataset.id;
     const nome = formProduto.nome.value.trim();
     const descricao = formProduto.descricao.value.trim();
-    // Agora pegamos campo do tipo “text” e parseamos para float corretamente
-    const valorUnitario = parseFloat(formProduto.valor.value.replace(/\./g, "").replace(",", ".")) || 0;
+    // Agora parseamos do campo texto para float aceitando vírgula
+    const valorUnitario = parseMoedaBr(formProduto.valor.value);
     const quantidadeEstoque = parseInt(formProduto.quantidade.value) || 0;
     const fotos = Array.from(formProduto.fotos.files);
 
@@ -86,13 +101,14 @@ if (formProduto) {
       return;
     }
 
-    // Se estiver em modo EDIÇÃO, não enviamos fotos novas.
     try {
       if (idEdicao) {
+        // Em edição, não enviamos fotos novas
         await atualizarProduto(idEdicao, { nome, descricao, valorUnitario, quantidadeEstoque });
         formProduto.removeAttribute("data-id");
         formProduto.querySelector("button[type=submit]").textContent = "Cadastrar Produto";
       } else {
+        // Ao criar, passamos também o array de fotos
         await criarProduto({ nome, descricao, valorUnitario, quantidadeEstoque, fotos });
       }
       formProduto.reset();
@@ -112,10 +128,10 @@ async function preencherFormParaEdicao(id) {
 
     formProduto.nome.value = produto.nome;
     formProduto.descricao.value = produto.descricao;
-    // Para exibir, converte float para “1.234,56”
+    // Convertemos float para “1.234,56”
     formProduto.valor.value = produto.valorUnitario.toFixed(2).replace(".", ",");
     formProduto.quantidade.value = produto.quantidadeEstoque;
-    // Não mexemos em fotos já existentes: só mostraremos novas se o usuário carregar.
+    // Não mexemos em fotos já existentes: só exibimos novas se o usuário carregar.
 
     formProduto.dataset.id = produto.id;
     formProduto.querySelector("button[type=submit]").textContent = "Atualizar Produto";

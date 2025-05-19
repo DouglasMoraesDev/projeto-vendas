@@ -1,4 +1,5 @@
 // public/js/vendas.js
+
 import {
   getClientes,
   getProdutos,
@@ -17,6 +18,9 @@ const erroVenda = document.getElementById("erroVenda");
 const infoParcelas = document.getElementById("infoParcelas");
 const tituloVenda = document.getElementById("tituloVenda");
 const btnSubmitVenda = document.getElementById("btnSubmitVenda");
+
+// NOVO: campo de dia de vencimento
+const inputDiaVencimento = document.getElementById("diaVencimento");
 
 let listaProdutosCache = [];
 let listaClientesCache = [];
@@ -51,7 +55,7 @@ async function carregarOpcoes() {
   });
 }
 
-// Se vier “?edit=<id>”, preenche o formulário
+// Verifica se veio ?edit=<id> na URL para pré-preencher valores
 async function verificarModoEdicao() {
   const params = new URLSearchParams(window.location.search);
   if (params.has("edit")) {
@@ -62,21 +66,36 @@ async function verificarModoEdicao() {
 
     try {
       const v = await getVendaById(vendaEditId);
-      // Preenche cliente e produto
+
+      // Preenche cliente
       selectCliente.value = v.clienteId;
-      // Se a venda tiver vários itens, pega o primeiro
+
+      // Se houver itens, pega o primeiro
       const item = (v.itens && v.itens.length > 0) ? v.itens[0] : null;
       if (item) {
         selectProduto.value = item.mercadoriaId;
         valorUnit.value = formatarMoedaBr(item.precoUnitario);
       }
+
       // Preenche tipo de pagamento
       document.querySelector(`input[name="tipoPagamento"][value="${v.tipoPagamento}"]`).checked = true;
+
       if (v.tipoPagamento === "PARCELADO") {
         divParcelamento.style.display = "block";
+
+        // Preenche entrada
         document.getElementById("entrada").value = v.entrada.toFixed(2).replace(".", ",");
+
+        // Preenche número de parcelas
         document.getElementById("quantParcelas").value = v.numParcelas;
-        // Dispara o cálculo das parcelas para mostrar infoParcelas
+
+        // Preenche dia de vencimento: pega a dataVencimento da primeira parcela
+        if (v.parcelas && v.parcelas.length > 0) {
+          const primeira = new Date(v.parcelas[0].dataVencimento);
+          inputDiaVencimento.value = primeira.getDate(); // dia do mês
+        }
+
+        // Força disparar o evento "input" para recalcular infoParcelas
         formVenda.dispatchEvent(new Event("input"));
       }
     } catch (err) {
@@ -111,24 +130,34 @@ tipoPagamentoRadios.forEach(radio => {
   });
 });
 
-// Recalcula valor e datas das parcelas conforme input
+// Recalcula valor e datas das parcelas conforme input (incluindo diaVencimento)
 formVenda?.addEventListener("input", () => {
   const tipo = document.querySelector("input[name='tipoPagamento']:checked")?.value;
   if (tipo === "PARCELADO") {
     const valorTotal = parseMoedaBr(valorUnit.value);
     const entrada = parseMoedaBr(document.getElementById("entrada").value);
     const numParcelas = parseInt(document.getElementById("quantParcelas").value);
+    const dia = parseInt(inputDiaVencimento.value);
 
-    if (!isNaN(valorTotal) && !isNaN(entrada) && !isNaN(numParcelas) && numParcelas > 0) {
+    // Só calcula se tiver todos os valores válidos
+    if (!isNaN(valorTotal) &&
+        !isNaN(entrada) &&
+        !isNaN(numParcelas) && numParcelas > 0 &&
+        !isNaN(dia) && dia >= 1 && dia <= 28) {
       const saldo = valorTotal - entrada;
       const valorParcela = saldo / numParcelas;
-      const hoje = new Date();
-      const diaMes = hoje.getDate();
 
       let texto = `<p>Valor de cada parcela: <strong>${formatarMoedaBr(valorParcela)}</strong></p>`;
       texto += "<p>Datas de vencimento:</p><ul>";
+
+      // Para cada parcela, usamos o mês atual + i, mas substituímos o dia pelo escolhido
+      const hoje = new Date();
+      const mesAtual = hoje.getMonth();
+      const anoAtual = hoje.getFullYear();
+
       for (let i = 1; i <= numParcelas; i++) {
-        const dataVenc = new Date(hoje.getFullYear(), hoje.getMonth() + i, diaMes);
+        // Mês de vencimento: mês atual + i (1 = próximo mês, etc.)
+        const dataVenc = new Date(anoAtual, mesAtual + i, dia);
         texto += `<li>Parcela ${i}: ${dataVenc.toLocaleDateString('pt-BR')}</li>`;
       }
       texto += "</ul>";
@@ -140,7 +169,7 @@ formVenda?.addEventListener("input", () => {
   }
 });
 
-// Envia formulário (POST ou PUT, dependendo de modoEdicao)
+// Submete o formulário (POST ou PUT)
 if (formVenda) {
   formVenda.addEventListener("submit", async e => {
     e.preventDefault();
@@ -172,25 +201,28 @@ if (formVenda) {
     if (tipoPagamento === "PARCELADO") {
       const entrada = parseMoedaBr(document.getElementById("entrada").value);
       const numParcelas = parseInt(document.getElementById("quantParcelas").value);
+      const dia = parseInt(inputDiaVencimento.value);
 
-      if (isNaN(entrada) || isNaN(numParcelas) || numParcelas < 1) {
-        erroVenda.textContent = "Preencha corretamente entrada e número de parcelas.";
+      if (isNaN(entrada) || isNaN(numParcelas) || numParcelas < 1 || isNaN(dia) || dia < 1 || dia > 28) {
+        erroVenda.textContent = "Preencha corretamente entrada, nº de parcelas e dia de vencimento (1–28).";
         erroVenda.classList.add("visivel");
         return;
       }
 
       dados.entrada = entrada;
       dados.numParcelas = numParcelas;
+      dados.diaVencimento = dia; // <-- incluímos o dia de vencimento
     }
 
     try {
       if (modoEdicao && vendaEditId) {
-        // Apenas atualiza campos básicos (não itens)
+        // Atualiza somente campos básicos (não itens)
         await atualizarVenda(vendaEditId, {
           clienteId: Number(clienteId),
           tipoPagamento,
           entrada: dados.entrada,
-          numParcelas: dados.numParcelas
+          numParcelas: dados.numParcelas,
+          diaVencimento: dados.diaVencimento   // opcionalmente, enviar para o backend
         });
         alert("Venda atualizada com sucesso!");
       } else {
@@ -206,7 +238,6 @@ if (formVenda) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Se não estiver logado, redireciona
   if (!localStorage.getItem("token")) {
     window.location.href = "index.html";
     return;
@@ -215,4 +246,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   divParcelamento.style.display = "none";
   await verificarModoEdicao();
 });
-

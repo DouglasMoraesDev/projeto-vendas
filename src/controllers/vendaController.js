@@ -10,7 +10,7 @@ module.exports = {
   // ----------------------------
   async create(req, res, next) {
     try {
-      const { clienteId, itens, tipoPagamento, entrada, numParcelas } = req.body;
+      const { clienteId, itens, tipoPagamento, entrada, numParcelas, diaVencimento } = req.body;
       // itens = [ { mercadoriaId, quantidade }, ... ]
       if (!Array.isArray(itens) || itens.length === 0) {
         return res.status(400).json({ error: 'Itens da venda são obrigatórios' });
@@ -70,23 +70,29 @@ module.exports = {
         });
       }
 
-      // 5) Se parcelado, gera as parcelas
+      // 5) Se parcelado e diaVencimento foi informado, gera as parcelas usando este dia
       if (tipoPagamento === 'PARCELADO') {
+        const dia = Number(diaVencimento);
+        if (isNaN(dia) || dia < 1 || dia > 28) {
+          return res.status(400).json({ error: 'Dia de vencimento inválido (precisa ser 1–28)' });
+        }
+
         const saldo = valorTotal - parseFloat(entrada);
         const valorParcela = parseFloat((saldo / Number(numParcelas)).toFixed(2));
+
         const hoje = new Date();
+        const mesAtual = hoje.getMonth();
+        const anoAtual = hoje.getFullYear();
         const parcelasData = [];
 
         for (let i = 1; i <= Number(numParcelas); i++) {
+          // A nova data de vencimento usa o mês atual + i e o dia informado
+          const dataVenc = new Date(anoAtual, mesAtual + i, dia);
           parcelasData.push({
             vendaId: venda.id,
             numParcela: i,
             valorParcela,
-            dataVencimento: new Date(
-              hoje.getFullYear(),
-              hoje.getMonth() + i,
-              hoje.getDate()
-            )
+            dataVencimento: dataVenc
           });
         }
         await prisma.parcela.createMany({ data: parcelasData });

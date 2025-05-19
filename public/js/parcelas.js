@@ -1,4 +1,5 @@
 // public/js/parcelas.js
+
 import {
   getParcelasPendentes,
   pagarParcela,
@@ -66,6 +67,7 @@ async function renderizarVendasPendentes() {
 // Exibe formulário de pagamento para cada parcela daquela venda
 function mostrarDetalhesParcela(vendaId, parcelas, container) {
   container.innerHTML = ""; // limpa antes de reencher
+
   parcelas.forEach(p => {
     const form = document.createElement("form");
     form.id = `formPag-${p.id}`;
@@ -87,7 +89,8 @@ function mostrarDetalhesParcela(vendaId, parcelas, container) {
       erroPag.textContent = "";
       erroPag.classList.remove("visivel");
 
-      const arquivo = document.getElementById(`arquivo-${p.id}`).files[0];
+      const arquivoInput = document.getElementById(`arquivo-${p.id}`);
+      const arquivo = arquivoInput.files[0];
       const recebidoPor = document.getElementById(`recebidoPor-${p.id}`).value.trim();
 
       if (!arquivo || !recebidoPor) {
@@ -97,17 +100,39 @@ function mostrarDetalhesParcela(vendaId, parcelas, container) {
       }
 
       try {
+        // 1) Envia ao backend para salvar o comprovante e marcar parcela como paga
         await pagarParcela(p.id, { recebidoPor, arquivo });
-        // Abre PDF de recibo (rota pública)
-        window.open(`${BASE_URL}/api/comprovantes/${p.id}/pdf`, "_blank");
-        // Abre WhatsApp com mensagem pronta
-        const telefone = p.venda.cliente.telefone.replace(/\D/g, '');
-        const nomeCli = p.venda.cliente.nome;
-        const textoWhats = encodeURIComponent(`Olá ${nomeCli}, segue recibo da parcela ${p.numParcela}.`);
-        window.open(`https://wa.me/${telefone}?text=${textoWhats}`, "_blank");
 
-        alert("Parcela paga com sucesso!");
-        renderizarVendasPendentes(); // atualiza a lista inteira
+        // 2) Busca o PDF de recibo gerado e força o download
+        const pdfUrl = `${BASE_URL}/api/comprovantes/${p.id}/pdf`;
+        const pdfResponse = await fetch(pdfUrl);
+        if (!pdfResponse.ok) {
+          throw new Error("Falha ao gerar recibo em PDF.");
+        }
+        const pdfBlob = await pdfResponse.blob();
+        // Cria URL temporária para download
+        const urlTemp = URL.createObjectURL(pdfBlob);
+        const a = document.createElement("a");
+        a.href = urlTemp;
+        a.download = `recibo_parcela_${p.id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(urlTemp);
+
+        // 3) Abre o WhatsApp para conversar com o cliente
+        //    O PDF já está baixado; o usuário só precisará anexá-lo manualmente
+        const telefoneRaw = p.venda.cliente.telefone.replace(/\D/g, '');
+        const nomeCli = encodeURIComponent(p.venda.cliente.nome);
+        const textoWhats = encodeURIComponent(
+          `Olá ${nomeCli}, o recibo da parcela ${p.numParcela} foi gerado e baixado.`
+        );
+        window.open(`https://wa.me/${telefoneRaw}?text=${textoWhats}`, "_blank");
+
+        alert("Parcela paga com sucesso! O PDF do recibo foi baixado e o WhatsApp foi aberto.");
+
+        // 4) Recarrega toda a lista de parcelas pendentes
+        renderizarVendasPendentes();
       } catch (err) {
         erroPag.textContent = err.message;
         erroPag.classList.add("visivel");
@@ -117,5 +142,10 @@ function mostrarDetalhesParcela(vendaId, parcelas, container) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Se não estiver logado, redireciona para login
+  if (!localStorage.getItem("token")) {
+    window.location.href = "index.html";
+    return;
+  }
   renderizarVendasPendentes();
 });

@@ -1,74 +1,191 @@
-/* public/css/styles.css */
+/* public/css/style.css */
 
-/* Reset simples de margens/paddings */
+/* ========================= */
+/* VARIÁVEIS DE TEMA        */
+/* ========================= */
+:root {
+  --primary-color: #005f99;      /* Azul escuro */
+  --secondary-color: #f0f8ff;    /* Azul claro */
+  --accent-color: #ff6f61;       /* Coral para botões/hover */
+  --text-color: #333333;         /* Texto principal */
+  --bg-color: #d6d6d6;           /* Fundo geral */
+  --card-bg: #ffffff;            /* Fundo de cards */
+  --card-border: #dddddd;        /* Borda de cards */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ========================= */
+/* RESET E GLOBAL            */
+/* ========================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-family);
 }
 
-/* Body e container principal */
 body {
-  background: #f5f5f5;
-  color: #333;
-  line-height: 1.5;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
 }
 
 .container {
   width: 90%;
   max-width: 1200px;
   margin: 2rem auto;
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background-color: var(--card-bg);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
-/* Cabeçalhos e títulos */
-h1, h2, h3, h4, h5 {
+/* ========================= */
+/* TIPOGRAFIA                */
+/* ========================= */
+h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1rem;
-  color: #222;
+  color: var(--primary-color);
+  text-align: center;
 }
 
-/* Links e botões */
-a {
-  color: #0066cc;
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
+p {
+  margin-bottom: 0.75rem;
 }
 
+/* ========================= */
+/* MENU RESPONSIVO AJUSTADO  */
+/* ========================= */
+nav {
+  background-color: var(--primary-color);
+  padding: 0.5rem 1rem;      /* menos padding para nav */
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Botão de menu (hamburger) menor */
+#menuBtn {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;           /* menor que antes */
+  padding: 0.25rem 0.5rem;    /* reduzido */
+  cursor: pointer;
+}
+
+/* Lista de links oculta por padrão */
+#menuLinks {
+  list-style: none;
+  display: none;              /* escondida inicialmente */
+  flex-direction: column;     /* exibir verticalmente */
+  margin: 0;
+  padding: 0;
+  width: 100%;                /* ocupa toda a largura no mobile */
+  margin-top: 0.5rem;
+}
+
+/* Quando #menuLinks tiver a classe .show, mostramos em coluna */
+#menuLinks.show {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cada item da lista */
+#menuLinks li {
+  margin: 0.3rem 0;           /* espaçamento vertical entre itens */
+}
+
+/* Link dentro do li */
+#menuLinks a {
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;     /* espaçamento reduzido */
+  border-radius: 4px;
+  display: block;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover do link */
+#menuLinks a:hover {
+  background-color: var(--accent-color);
+}
+
+/* Em telas largas, mostramos os links sempre em linha e escondemos o botão */
+@media (min-width: 769px) {
+  #menuLinks {
+    display: flex !important;
+    flex-direction: row;      /* horizontal no desktop */
+    gap: 1rem;
+    width: auto;
+    margin-top: 0;            /* sem margem superior */
+  }
+  #menuBtn {
+    display: none;            /* esconde o botão em desktop */
+  }
+  nav {
+    justify-content: center;  /* centraliza todo o nav */
+  }
+}
+
+/* ========================= */
+/* BOTÕES                    */
+/* ========================= */
 button {
   padding: 0.6rem 1.2rem;
   border: none;
-  background-color: #0066cc;
-  color: #fff;
-  border-radius: 4px;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border-radius: 6px;
   cursor: pointer;
-}
-button:hover {
-  background-color: #004999;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
 }
 
-/* Inputs e selects */
+button:hover {
+  background-color: var(--accent-color);
+}
+
+/* Espaçamento entre botões dentro de .card */
+.card button {
+  margin: 0.5rem 0.5rem 0 0; /* 0.5rem à direita e em cima */
+}
+
+/* ========================= */
+/* FORMULÁRIOS               */
+/* ========================= */
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
 input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="number"],
 select {
   width: 100%;
-  padding: 0.6rem;
+  padding: 0.7rem;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   margin-bottom: 1rem;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
 }
 
-label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-weight: bold;
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
 
 /* Mensagens de erro */
@@ -76,63 +193,125 @@ label {
   color: #c00;
   margin-bottom: 1rem;
   display: none;
+  font-weight: 500;
 }
 .erro.visivel {
   display: block;
 }
 
-/* Cards de venda, produto etc. */
-.card {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: #fafafa;
-}
-.card img {
-  max-width: 100px;
-  max-height: 80px;
-  display: block;
-  margin-bottom: 0.7rem;
-}
-
-/* Layout de navegação (dashboard) */
-nav {
-  background: #0066cc;
-  padding: 1rem;
-  color: #fff;
+/* Centraliza formulários e conteúdos de parcelas */
+.parcelasDetalhes form {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-nav a {
-  color: #fff;
-  font-weight: bold;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Tabela simples */
+/* ========================= */
+/* CARDS                     */
+/* ========================= */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem;
+  box-shadow: 0 1px 5px var(--shadow-color);
+  flex: 1 1 300px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 0.8rem;
+  object-fit: cover;
+}
+
+/* Contêiner genérico de cards */
+#listaProdutos,
+#historicoContainer,
+#lojaContainer,
+#vendasPendentes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* ========================= */
+/* TABELAS (caso existam)    */
+/* ========================= */
 table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 1rem;
 }
-table th, table td {
+
+table th,
+table td {
   border: 1px solid #ddd;
-  padding: 0.6rem;
+  padding: 0.8rem;
   text-align: left;
 }
+
 table th {
-  background: #f0f0f0;
+  background-color: var(--secondary-color);
+  font-weight: 600;
 }
 
-/* Responsividade simples */
-@media (max-width: 768px) {
+/* ========================= */
+/* LAYOUT RESPONSIVO         */
+/* ========================= */
+@media (max-width: 1024px) {
   .container {
     width: 95%;
     padding: 1rem;
   }
   nav {
-    flex-direction: column;
     gap: 0.5rem;
   }
+}
+
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    align-items: center;
+  }
+  .card {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+/* ========================= */
+/* ESTILIZAÇÕES ESPECÍFICAS  */
+/* ========================= */
+
+/* Ajuste de campos de valor para aceitar vírgulas (ex.: 15.000,00) */
+input[type="text"].moeda {
+  /* Se usar classe moeda no input de valor */
+  text-align: right;
+}
+
+/* Centraliza formulários */
+form {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========================= */
+/* EXTRAS                    */
+/* ========================= */
+/* Adiciona transição suave em elementos de hover */
+a, button, input, select {
+  transition: all 0.2s ease;
 }

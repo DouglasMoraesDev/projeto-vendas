@@ -13,10 +13,10 @@ router.get('/', ctrl.findAll);
 // Busca venda por ID
 router.get('/:id', ctrl.findById);
 
-// Atualiza venda por ID (edição básica)
+// Atualiza venda por ID (edição básica; incluído opcional diaVencimento)
 router.put('/:id', ctrl.update);
 
-// Exclui venda por ID (remove também itens, parcelas e comprovantes)
+// Exclui venda por ID
 router.delete('/:id', ctrl.remove);
 
 module.exports = router;

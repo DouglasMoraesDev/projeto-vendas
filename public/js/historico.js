@@ -1,5 +1,6 @@
 // public/js/historico.js
-import { getVendas, excluirVenda } from "./api.js";
+
+import { getVendas, excluirVenda, BASE_URL } from "./api.js";
 
 // Formata R$ 1.234,56
 function formatarMoedaBr(valor) {
@@ -20,9 +21,12 @@ function renderizarHistorico(vendas) {
     const item = (v.itens && v.itens.length > 0) ? v.itens[0] : null;
     const mercadoria = item?.mercadoria;
     const fotos = mercadoria?.fotos || [];
-    const fotosHtml = fotos.map(foto =>
-      `<img src="${foto.caminho}" alt="${mercadoria.nome}" width="80" />`
-    ).join("");
+    const fotosHtml = fotos
+      .map(foto => {
+        // Usa BASE_URL para prefixar o caminho (ex: "/uploads/produtos/...jpg")
+        return `<img src="${BASE_URL}${foto.caminho}" alt="${mercadoria.nome}" width="80" />`;
+      })
+      .join("");
 
     card.innerHTML = `
       <h4>Venda #${v.id} — ${new Date(v.criadoEm).toLocaleString('pt-BR')}</h4>
@@ -86,5 +90,10 @@ async function carregarHistorico() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Se não estiver logado, redireciona
+  if (!localStorage.getItem("token")) {
+    window.location.href = "index.html";
+    return;
+  }
   carregarHistorico();
 });

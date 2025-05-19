@@ -1,5 +1,6 @@
 // public/js/loja.js
-import { getProdutosLoja } from "./api.js";
+
+import { getProdutosLoja, BASE_URL } from "./api.js";
 
 const containerLoja = document.getElementById("lojaContainer");
 
@@ -13,8 +14,9 @@ function renderizarLoja(produtos) {
   containerLoja.innerHTML = "";
 
   produtos.forEach(p => {
-    const foto = p.fotos.length 
-      ? `<img src="${p.fotos[0].caminho}" alt="${p.nome}" width="100" />` 
+    // Prefixa a primeira foto com BASE_URL se existir
+    const foto = (Array.isArray(p.fotos) && p.fotos.length > 0)
+      ? `<img src="${BASE_URL}${p.fotos[0].caminho}" alt="${p.nome}" width="100" />`
       : "";
 
     const card = document.createElement("div");
@@ -44,6 +46,12 @@ function renderizarLoja(produtos) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
+    // Se não estiver logado, redireciona
+    if (!localStorage.getItem("token")) {
+      window.location.href = "index.html";
+      return;
+    }
+
     const produtos = await getProdutosLoja();
     renderizarLoja(produtos);
   } catch (err) {
