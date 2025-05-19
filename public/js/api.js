@@ -1,10 +1,10 @@
 // public/js/api.js
 
-// Base URL do backend (Railway)
-const BASE_URL = "https://projeto-vendas-production.up.railway.app";
+// Base URL do backend (Railway ou localhost, conforme seu ambiente)
+export const BASE_URL = "https://projeto-vendas-production.up.railway.app";
 
 // ================================
-// AUTENTICAÇÃO
+// AUTENTICAÇÃO INTERNA (ADMIN)
 // ================================
 export async function registerUser(dados) {
   const resp = await fetch(`${BASE_URL}/api/auth/register`, {
@@ -33,7 +33,7 @@ export async function loginUser(email, senha) {
 }
 
 // ================================
-// CLIENTES
+// CLIENTES (ADMIN)
 // ================================
 export async function getClientes() {
   const token = localStorage.getItem("token");
@@ -101,12 +101,12 @@ export async function excluirCliente(id) {
 }
 
 // ================================
-// MERCADORIAS (PRODUTOS)
+// MERCADORIAS (PRODUTOS) (ADMIN)
 // ================================
 export async function getProdutos() {
   const token = localStorage.getItem("token");
   const resp = await fetch(`${BASE_URL}/api/mercadorias`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
   if (!resp.ok) throw new Error("Erro ao buscar produtos");
   return resp.json();
@@ -128,7 +128,7 @@ export async function criarProduto(dados) {
   formData.append("descricao", dados.descricao);
   formData.append("valorUnitario", dados.valorUnitario);
   formData.append("quantidadeEstoque", dados.quantidadeEstoque);
-  dados.fotos.forEach(foto => formData.append("fotos", foto));
+  dados.fotos.forEach((foto) => formData.append("fotos", foto));
 
   const resp = await fetch(`${BASE_URL}/api/mercadorias`, {
     method: "POST",
@@ -173,7 +173,7 @@ export async function excluirProduto(id) {
 }
 
 // ================================
-// VENDAS
+// VENDAS (ADMIN)
 // ================================
 export async function criarVenda(dados) {
   const token = localStorage.getItem("token");
@@ -210,8 +210,6 @@ export async function getVendaById(id) {
   return resp.json();
 }
 
-
-// DELETE /api/vendas/:id
 export async function excluirVenda(id) {
   const token = localStorage.getItem("token");
   const resp = await fetch(`${BASE_URL}/api/vendas/${id}`, {
@@ -225,7 +223,6 @@ export async function excluirVenda(id) {
   return;
 }
 
-// PUT /api/vendas/:id   (edição simples)
 export async function atualizarVenda(id, dados) {
   const token = localStorage.getItem("token");
   const resp = await fetch(`${BASE_URL}/api/vendas/${id}`, {
@@ -244,7 +241,7 @@ export async function atualizarVenda(id, dados) {
 }
 
 // ================================
-// PARCELAS
+// PARCELAS (ADMIN)
 // ================================
 export async function getParcelasPendentes() {
   const token = localStorage.getItem("token");
@@ -283,7 +280,7 @@ export async function pagarParcela(idParcela, dadosPagamento) {
 }
 
 // ================================
-// COMPROVANTES
+// COMPROVANTES (ADMIN)
 // ================================
 export async function getComprovantesByCliente(clienteId) {
   const token = localStorage.getItem("token");
@@ -294,21 +291,15 @@ export async function getComprovantesByCliente(clienteId) {
   return resp.json();
 }
 
-// Abre diretamente o PDF (rota pública)
 export function baixarPdfComprovante(parcelaId) {
   window.open(`${BASE_URL}/api/comprovantes/${parcelaId}/pdf`, "_blank");
 }
 
 // ================================
-// LOJA (PÚBLICO)
+// LOJA PÚBLICA (VISITANTE)
 // ================================
 export async function getProdutosLoja() {
-  const token = localStorage.getItem("token");    // <–– pega o token salvo
-  const resp = await fetch(`${BASE_URL}/api/mercadorias`, {
-    headers: { Authorization: `Bearer ${token}` }  // <–– envia o cabeçalho
-  });
-  if (!resp.ok) throw new Error("Erro ao buscar produtos para loja");
-  return resp.json();
+  const res = await fetch(`${BASE_URL}/api/public/mercadorias`);
+  if (!res.ok) throw new Error("Falha ao buscar produtos");
+  return await res.json();
 }
-
-export { BASE_URL };

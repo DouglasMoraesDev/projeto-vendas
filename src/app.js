@@ -1,70 +1,92 @@
 // src/app.js
-require('dotenv').config();
-const express = require('express');
-const cors    = require('cors');
-const path    = require('path');
 
-// Importa todas as rotas
-const authRoutes        = require('./routes/authRoutes');
-const clienteRoutes     = require('./routes/clienteRoutes');
-const mercadoriaRoutes  = require('./routes/mercadoriaRoutes');
-const vendaRoutes       = require('./routes/vendaRoutes');
-const parcelaRoutes     = require('./routes/parcelaRoutes');
-const comprovanteRoutes = require('./routes/comprovanteRoutes');
-const dashboardRoutes   = require('./routes/dashboardRoutes');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
 
-// Controller de comprovante (para rota PDF sem auth)
-const comprovanteController = require('./controllers/comprovanteController');
+// Importa todos os controladores de rota
+const authRoutes = require("./routes/authRoutes");
+const clienteRoutes = require("./routes/clienteRoutes");
+const mercadoriaRoutes = require("./routes/mercadoriaRoutes");
+const vendaRoutes = require("./routes/vendaRoutes");
+const parcelaRoutes = require("./routes/parcelaRoutes");
+const comprovanteRoutes = require("./routes/comprovanteRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
-const authMiddleware = require('./middlewares/authMiddleware');
+// Rotas da loja pública
+const publicMercadoriaRoutes = require("./routes/publicMercadoriaRoutes");
+const storeAuthRoutes = require("./routes/storeAuthRoutes");
+const visitaRoutes = require("./routes/visitaRoutes");
+
+// Controlador de comprovante (rota pública para PDF)
+const comprovanteController = require("./controllers/comprovanteController");
+
+// Middleware de autenticação para rotas protegidas
+const authMiddleware = require("./middlewares/authMiddleware");
+
 const app = express();
 
 // --- Middlewares Globais ---
 app.use(cors());
 app.use(express.json());
 
-// Expor uploads (imagens e PDFs) publicamente
-const uploadsDir = path.resolve(__dirname, '..', 'uploads');
-app.use('/uploads', express.static(uploadsDir));
+// Expor a pasta 'uploads' publicamente, para servir imagens e PDFs
+const uploadsDir = path.resolve(__dirname, "..", "uploads");
+app.use("/uploads", express.static(uploadsDir));
 
-// Health‐check
-app.get('/api/health', (req, res) =>
-  res.json({ status: 'OK', timestamp: new Date() })
+// Health‐check simples
+app.get("/api/health", (req, res) =>
+  res.json({ status: "OK", timestamp: new Date() })
 );
 
-// Rotas de autenticação (públicas)
-app.use('/api/auth', authRoutes);
+// ----- ROTAS PÚBLICAS -----
+// Autenticação interna (admin)
+app.use("/api/auth", authRoutes);
 
-// Rotas protegidas (aplicam authMiddleware)
-app.use('/api/clientes', authMiddleware, clienteRoutes);
-app.use('/api/mercadorias', authMiddleware, mercadoriaRoutes);
-app.use('/api/vendas', authMiddleware, vendaRoutes);
-app.use('/api/parcelas', authMiddleware, parcelaRoutes);
-// Rotas do dashboard (com autenticação)
-app.use('/api/dashboard', dashboardRoutes);
+// Loja pública: cadastro/login de visitante
+app.use("/api/store", storeAuthRoutes);
+// Loja pública: conta visitas
+app.use("/api/visitas", visitaRoutes);
+// Loja pública: lista de mercadorias
+app.use("/api/public", publicMercadoriaRoutes);
 
-// Rotas de comprovantes:
-//  • Baixar PDF não exige token
-app.get('/api/comprovantes/:parcelaId/pdf', comprovanteController.pdfByParcela);
-//  • Listar comprovantes exige autenticação
-app.use('/api/comprovantes', authMiddleware, comprovanteRoutes);
+// Comprovante PDF (público, sem token)
+app.get(
+  "/api/comprovantes/:parcelaId/pdf",
+  comprovanteController.pdfByParcela
+);
 
-// Serve o frontend a partir de public/
-const frontendDir = path.resolve(__dirname, '..', 'public');
+// ----- ROTAS PROTEGIDAS (APLICAM authMiddleware) -----
+// Clientes (admin)
+app.use("/api/clientes", authMiddleware, clienteRoutes);
+// Mercadorias (admin)
+app.use("/api/mercadorias", authMiddleware, mercadoriaRoutes);
+// Vendas (admin)
+app.use("/api/vendas", authMiddleware, vendaRoutes);
+// Parcelas (admin)
+app.use("/api/parcelas", authMiddleware, parcelaRoutes);
+// Comprovantes (listar, protegido)
+app.use("/api/comprovantes", authMiddleware, comprovanteRoutes);
+// Dashboard (estatísticas de admin)
+app.use("/api/dashboard", authMiddleware, dashboardRoutes);
+
+// ----- SERVIR FRONT-END (pasta 'public') -----
+const frontendDir = path.resolve(__dirname, "..", "public");
 app.use(express.static(frontendDir));
 
-// Qualquer rota que NÃO comece com /api/, envia index.html
+// Qualquer rota que não comece com /api/ retorna o index.html (SPA ou páginas estáticas)
 app.get(/^(?!\/api\/).*/, (req, res) => {
-  res.sendFile(path.join(frontendDir, 'index.html'));
+  res.sendFile(path.join(frontendDir, "index.html"));
 });
 
-// Tratamento de erro genérico
+// Tratamento genérico de erros
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: err.message });
 });
 
-// Porta
+// Iniciar servidor
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Backend rodando na porta ${PORT}`);

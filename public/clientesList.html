@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Produtos Cadastrados</title>
+  <title>Clientes Cadastrados</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -12,40 +12,39 @@
       <button id="menuBtn">☰ Menu</button>
       <ul id="menuLinks">
         <li><a href="dashboard.html">Painel ADM</a></li>
-        <li><a href="clientes.html">Clientes</a></li>
+        <li><a href="clientesList.html">Clientes</a></li>
+        <li><a href="novoCliente.html">Cadastrar Cliente</a></li>
         <li><a href="produtos.html">Produtos</a></li>
-        <li><a href="novoProduto.html">Cadastrar Produto</a></li>
         <li><a href="vendas.html">Cadastrar Venda</a></li>
-        <li><a href="historico.html">Histórico de vendas</a></li>
-        <li><a href="controleParcelas.html">Controle de parcelas</a></li>
-        <li><a href="comprovantes.html">Comprovantes de vendas</a></li>
+        <li><a href="historico.html">Histórico de Vendas</a></li>
+        <li><a href="controleParcelas.html">Controle de Parcelas</a></li>
+        <li><a href="comprovantes.html">Comprovantes</a></li>
         <li><a href="loja.html">Loja</a></li>
         <li><a href="index.html" id="logout">Sair</a></li>
       </ul>
     </nav>
 
-    <h1>Mercadorias Cadastrados</h1>
+    <h1>Clientes Cadastrados</h1>
 
-    <!-- Barra de busca -->
+    <!-- Barra de pesquisa -->
     <input
       type="text"
-      id="buscaProduto"
-      placeholder="Pesquise pelo nome do produto..."
+      id="buscaCliente"
+      placeholder="Pesquisar pelo nome..."
       style="width: 100%; padding: 0.7rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid #ccc;"
     />
 
-    <!-- Lista de produtos -->
-    <div id="listaProdutos"></div>
+    <!-- Lista de clientes -->
+    <div id="listaClientes"></div>
   </div>
 
-  <!-- Carrega script de listagem/CRUD -->
-  <script type="module" src="js/produtos.js"></script>
+  <script type="module" src="js/clientesList.js"></script>
   <script>
-    // Alternar menu
+    // Alterna visibilidade dos links do menu
     document.getElementById('menuBtn').addEventListener('click', () => {
       document.getElementById('menuLinks').classList.toggle('show');
     });
-    // Fecha menu ao clicar no link
+    // Fecha menu ao clicar em qualquer link
     document.querySelectorAll('#menuLinks a').forEach(link => {
       link.addEventListener('click', () => {
         document.getElementById('menuLinks').classList.remove('show');
@@ -54,7 +53,9 @@
     // Logout
     const logout = document.getElementById('logout');
     if (logout) {
-      logout.addEventListener('click', () => localStorage.removeItem('token'));
+      logout.addEventListener('click', () => {
+        localStorage.removeItem('token');
+      });
     }
   </script>
 </body>

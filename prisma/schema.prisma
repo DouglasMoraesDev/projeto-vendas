@@ -102,3 +102,18 @@ enum TipoPagamento {
   AVISTA
   PARCELADO
 }
+
+/// NOVOS MODELOS PARA LOJA
+model LojaVisitante {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  telefone  String
+  senha     String
+  criadoEm  DateTime @default(now())
+}
+
+model Visita {
+  id        Int      @id @default(autoincrement())
+  criadoEm  DateTime @default(now())
+}
