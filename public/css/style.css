@@ -206,9 +206,9 @@ select:focus {
   align-items: center;
 }
 
-/* ========================= */
-/* CARDS                     */
-/* ========================= */
+/* … código anterior … */
+
+/* CARDS */
 .card {
   background-color: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -224,12 +224,22 @@ select:focus {
   text-align: center;
 }
 
+/* ajuste geral para imagens dentro de card */
 .card img {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
   margin-bottom: 0.8rem;
   object-fit: cover;
+}
+
+/* TORNA AS IMAGENS APENAS NA LOJA MUITO MENORES */
+#lojaContainer .card img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
 }
 
 /* Contêiner genérico de cards */
@@ -243,6 +253,9 @@ select:focus {
   gap: 1rem;
   margin-top: 1rem;
 }
+
+/* … restante do CSS … */
+
 
 /* ========================= */
 /* TABELAS (caso existam)    */

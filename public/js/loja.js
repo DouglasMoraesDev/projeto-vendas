@@ -14,18 +14,22 @@ function renderizarLoja(produtos) {
   containerLoja.innerHTML = "";
 
   produtos.forEach(p => {
-    // Prefixa a primeira foto com BASE_URL se existir
-    const foto = (Array.isArray(p.fotos) && p.fotos.length > 0)
-      ? `<img src="${BASE_URL}${p.fotos[0].caminho}" alt="${p.nome}" width="100" />`
+    // Se houver fotos, gera um HTML com todas elas
+    const fotosHtml = Array.isArray(p.fotos) && p.fotos.length > 0
+      ? p.fotos.map(foto => 
+          `<img src="${BASE_URL}${foto.caminho}" alt="${p.nome}" class="produto-img" />`
+        ).join("")
       : "";
 
     const card = document.createElement("div");
     card.classList.add("card");
     card.innerHTML = `
-      ${foto}
+      <div class="fotos-loja">
+        ${fotosHtml}
+      </div>
       <h4>${p.nome}</h4>
       <p>${p.descricao || ""}</p>
-      <p>${formatarMoedaBr(p.valorUnitario)}</p>
+      <p class="valor-loja">${formatarMoedaBr(p.valorUnitario)}</p>
       <button class="whatsappBtn" data-id="${p.id}" data-nome="${encodeURIComponent(p.nome)}">
         Conversar
       </button>
