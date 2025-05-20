@@ -224,7 +224,7 @@ select:focus {
   text-align: center;
 }
 
-/* Ajuste geral para imagens dentro de card (maior que antes) */
+/* Ajuste geral para imagens dentro de card (agora maior) */
 .card img {
   max-width: 200px;       /* largura máxima aumentada */
   max-height: 150px;      /* altura máxima aumentada */
@@ -245,17 +245,20 @@ select:focus {
 /* ========================= */
 /* CARROSSEL DE FOTOS        */
 /* ========================= */
-/* Container do carrossel: define área fixa pra imagem */
+/* Container do carrossel: define área fixa pra imagem e centraliza */
 .card .gallery-container {
   position: relative;
+  display: flex;               /* centraliza o conteúdo */
+  justify-content: center;     /* alinha horizontalmente */
+  align-items: center;         /* alinha verticalmente */
   width: 100%;
-  height: 150px;     /* altura fixa para as fotos do carrossel */
+  height: 150px;               /* altura fixa para as fotos do carrossel */
   overflow: hidden;
   border-radius: 6px;
   margin-bottom: 0.8rem;
 }
 
-/* Cada imagem do carrossel cobre 100% do container */
+/* Cada imagem do carrossel cobre 100% do container, mas começa oculta */
 .card .gallery-container img {
   position: absolute;
   top: 0;
@@ -272,7 +275,7 @@ select:focus {
   opacity: 1;
 }
 
-/* Botões “anteriores” e “próximos” sobrepostos à imagem */
+/* Botões “anterior” e “próximo” sobrepostos à imagem */
 .card .gallery-container .prev,
 .card .gallery-container .next {
   position: absolute;

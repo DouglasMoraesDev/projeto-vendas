@@ -1,10 +1,10 @@
-<!-- public/dashboard.html -->
+<!-- public/configuracoes.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard</title>
+  <title>Configurações</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -27,40 +27,54 @@
       </ul>
     </nav>
 
-    <h1>Painel Administrativo</h1>
+    <h1>Configurações</h1>
 
-    <div id="resumoDashboard" class="card">
-      <p>Total de Clientes: <span id="totalClientes">0</span></p>
-      <p>Total de Produtos: <span id="totalProdutos">0</span></p>
-      <p>Total de Vendas: <span id="totalVendas">0</span></p>
-      <p>Total de Visitas na Loja: <span id="totalVisitas">0</span></p>
+    <!-- Seção de troca de senha -->
+    <div class="section-header">
+      <h2>Trocar Senha</h2>
     </div>
+    <form id="formTrocarSenha">
+      <label for="senhaAtual">Senha Atual:</label>
+      <input type="password" id="senhaAtual" name="senhaAtual" required />
 
-    <h2>Notificações de Parcelas a vencer</h2>
-    <div id="notificacoes"></div>
+      <label for="novaSenha">Nova Senha:</label>
+      <input type="password" id="novaSenha" name="novaSenha" required />
+
+      <label for="confirmaSenha">Confirmar Nova Senha:</label>
+      <input type="password" id="confirmaSenha" name="confirmaSenha" required />
+
+      <div id="erroSenha" class="erro"></div>
+      <button type="submit">Atualizar Senha</button>
+    </form>
+
+    <!-- Seção de backup do banco -->
+    <div class="section-header" style="margin-top: 2rem;">
+      <h2>Backup do Banco de Dados</h2>
+      <p>
+        Clique abaixo para gerar um backup completo de todas as tabelas em
+        formato JSON.
+      </p>
+    </div>
+    <button id="btnBackup">Gerar Backup (JSON)</button>
+    <div id="mensagemBackup" style="margin-top: 1rem; color: green;"></div>
   </div>
 
-  <script type="module" src="js/dashboard.js"></script>
+  <script type="module" src="js/configuracoes.js"></script>
   <script>
-    // Alterna visibilidade dos links quando o botão é clicado
+    // Alternar menu ao clicar no botão
     document.getElementById("menuBtn").addEventListener("click", () => {
-      const menu = document.getElementById("menuLinks");
-      menu.classList.toggle("show");
+      document.getElementById("menuLinks").classList.toggle("show");
     });
-
-    // Fecha o menu se o usuário clicar em qualquer link
+    // Fecha menu ao clicar em qualquer link
     document.querySelectorAll("#menuLinks a").forEach((link) => {
       link.addEventListener("click", () => {
         document.getElementById("menuLinks").classList.remove("show");
       });
     });
-
-    // Logout
+    // Logout: remove token e volta para login
     const logout = document.getElementById("logout");
     if (logout) {
-      logout.addEventListener("click", () => {
-        localStorage.removeItem("token");
-      });
+      logout.addEventListener("click", () => localStorage.removeItem("token"));
     }
   </script>
 </body>
