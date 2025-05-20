@@ -1,5 +1,3 @@
-// src/controllers/mercadoriaController.js
-
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const fs = require('fs');
@@ -35,7 +33,7 @@ module.exports = {
     }
   },
 
-  // POST /api/mercadorias (com upload.array('fotos', 5))
+  // POST /api/mercadorias (upload.array('fotos', 5))
   async create(req, res, next) {
     try {
       const { nome, descricao, valorUnitario, quantidadeEstoque } = req.body;
@@ -48,25 +46,20 @@ module.exports = {
         }
       });
 
-      // Cria pasta para fotos
+      // grava fotos
       const dest = path.join(__dirname, '../../uploads/produtos', String(nova.id));
-      if (!fs.existsSync(dest)) {
-        fs.mkdirSync(dest, { recursive: true });
-      }
+      if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
 
-      // Move cada arquivo e registra no banco
       const fotosData = [];
       (req.files || []).slice(0, 5).forEach(file => {
         const ext = path.extname(file.originalname);
         const filename = file.filename + ext;
-        const fullPath = path.join(dest, filename);
-        fs.renameSync(file.path, fullPath);
+        fs.renameSync(file.path, path.join(dest, filename));
         fotosData.push({
           mercadoriaId: nova.id,
           caminho: `/uploads/produtos/${nova.id}/${filename}`
         });
       });
-
       if (fotosData.length) {
         await prisma.foto.createMany({ data: fotosData });
       }
@@ -81,13 +74,13 @@ module.exports = {
     }
   },
 
-  // PUT /api/mercadorias/:id (aceita upload.array('fotos', 5))
+  // PUT /api/mercadorias/:id (upload.array('fotos', 5))
   async update(req, res, next) {
     try {
       const id = Number(req.params.id);
       const { nome, descricao, valorUnitario, quantidadeEstoque } = req.body;
 
-      // Atualiza campos básicos
+      // atualiza dados básicos
       const updated = await prisma.mercadoria.update({
         where: { id },
         data: {
@@ -98,27 +91,21 @@ module.exports = {
         }
       });
 
-      // Se vierem arquivos novos, grava-os
-      if (req.files && req.files.length > 0) {
+      // grava novas fotos se houver
+      if (Array.isArray(req.files) && req.files.length) {
         const dest = path.join(__dirname, '../../uploads/produtos', String(id));
-        if (!fs.existsSync(dest)) {
-          fs.mkdirSync(dest, { recursive: true });
-        }
+        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
 
-        const fotosData = [];
-        req.files.slice(0, 5).forEach(file => {
+        for (const file of req.files.slice(0, 5)) {
           const ext = path.extname(file.originalname);
           const filename = file.filename + ext;
-          const fullPath = path.join(dest, filename);
-          fs.renameSync(file.path, fullPath);
-          fotosData.push({
-            mercadoriaId: id,
-            caminho: `/uploads/produtos/${id}/${filename}`
+          fs.renameSync(file.path, path.join(dest, filename));
+          await prisma.foto.create({
+            data: {
+              mercadoriaId: id,
+              caminho: `/uploads/produtos/${id}/${filename}`
+            }
           });
-        });
-
-        if (fotosData.length) {
-          await prisma.foto.createMany({ data: fotosData });
         }
       }
 
@@ -128,14 +115,12 @@ module.exports = {
     }
   },
 
-  // DELETE /api/mercadorias/:id (remove fotos e registro)
+  // DELETE /api/mercadorias/:id
   async remove(req, res, next) {
     try {
       const id = Number(req.params.id);
       const dir = path.join(__dirname, '../../uploads/produtos', String(id));
-      if (fs.existsSync(dir)) {
-        fs.rmSync(dir, { recursive: true, force: true });
-      }
+      if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
       await prisma.foto.deleteMany({ where: { mercadoriaId: id } });
       await prisma.mercadoria.delete({ where: { id } });
       res.status(204).send();

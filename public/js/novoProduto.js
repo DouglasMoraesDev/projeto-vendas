@@ -1,5 +1,3 @@
-// public/js/novoProduto.js
-
 import {
   getProdutoById,
   criarProduto,
@@ -14,50 +12,53 @@ const previewExist = document.getElementById("previewExistente");
 let modoEdicao = false;
 let produtoId = null;
 
-// Detecta modo edição
+// Detecta modo edição pela query string
 const params = new URLSearchParams(location.search);
 if (params.has("edit")) {
   modoEdicao = true;
   produtoId = params.get("edit");
   titulo.textContent = `Editar Produto #${produtoId}`;
 
-  // Busca dados e pré-preenche
+  // busca e pré-preenche
   getProdutoById(produtoId)
     .then(p => {
       form.nome.value = p.nome;
       form.descricao.value = p.descricao;
-      // converte ponto para vírgula
       form.valorUnitario.value = p.valorUnitario.toFixed(2).replace(".", ",");
       form.quantidadeEstoque.value = p.quantidadeEstoque;
 
-      // preview das fotos atuais
+      // mostra preview das fotos existentes
       previewExist.innerHTML = "";
       (p.fotos || []).forEach(f => {
         const img = document.createElement("img");
-        img.src = `${f.caminho}`;
-        img.classList.add("thumb-produto");
+        img.src = f.caminho; // caminho público
         previewExist.appendChild(img);
       });
     })
-    .catch(() => (erro.textContent = "Não foi possível carregar o produto."));
+    .catch(() => {
+      erro.textContent = "Não foi possível carregar o produto.";
+      erro.classList.add("visivel");
+    });
 }
 
-// Submissão
+// submissão
 form.addEventListener("submit", async e => {
   e.preventDefault();
   erro.textContent = "";
+  erro.classList.remove("visivel");
 
   const data = new FormData(form);
   try {
     if (modoEdicao) {
       await atualizarProduto(produtoId, data);
-      alert("Produto atualizado!");
+      alert("Produto atualizado com sucesso!");
     } else {
       await criarProduto(data);
-      alert("Produto criado!");
+      alert("Produto criado com sucesso!");
     }
     location.href = "produtos.html";
   } catch (err) {
     erro.textContent = err.message;
+    erro.classList.add("visivel");
   }
 });
