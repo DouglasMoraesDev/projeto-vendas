@@ -4,16 +4,15 @@
 /* VARIÁVEIS DE TEMA        */
 /* ========================= */
 :root {
-  --primary-color: #005f99;
-  --secondary-color: #f0f8ff;
-  --accent-color: #ff6f61;
-  --text-color: #333333;
-  --bg-color: #d6d6d6;
-  --card-bg: #ffffff;
-  --card-border: #dddddd;
+  --primary-color: #005f99;      /* Azul escuro */
+  --secondary-color: #f0f8ff;    /* Azul claro */
+  --accent-color: #ff6f61;       /* Coral para botões/hover */
+  --text-color: #333333;         /* Texto principal */
+  --bg-color: #d6d6d6;           /* Fundo geral */
+  --card-bg: #ffffff;            /* Fundo de cards */
+  --card-border: #dddddd;        /* Borda de cards */
   --shadow-color: rgba(0, 0, 0, 0.1);
   --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --card-img-size: 200px;      /* Tamanho padrão imagens de cards */
 }
 
 /* ========================= */
@@ -45,164 +44,331 @@ body {
 /* ========================= */
 /* TIPOGRAFIA                */
 /* ========================= */
-h1,h2,h3,h4,h5,h6 {
-  margin-bottom:1rem;
-  color:var(--primary-color);
-  text-align:center;
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+  text-align: center;
 }
 
-p { margin-bottom:.75rem; }
+p {
+  margin-bottom: 0.75rem;
+}
 
 /* ========================= */
-/* MENU RESPONSIVO           */
+/* MENU RESPONSIVO AJUSTADO  */
 /* ========================= */
 nav {
   background-color: var(--primary-color);
-  padding:.5rem 1rem;
-  border-radius:8px;
-  margin-bottom:2rem;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-wrap:wrap;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-#menuBtn { /* ... */ }
-#menuLinks { /* ... */ }
-#menuLinks.show { /* ... */ }
-@media (min-width:769px){ /* ... */ }
+#menuBtn {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+
+#menuLinks {
+  list-style: none;
+  display: none;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+#menuLinks.show {
+  display: flex;
+  flex-direction: column;
+}
+
+#menuLinks li {
+  margin: 0.3rem 0;
+}
+
+#menuLinks a {
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  display: block;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+#menuLinks a:hover {
+  background-color: var(--accent-color);
+}
+
+@media (min-width: 769px) {
+  #menuLinks {
+    display: flex !important;
+    flex-direction: row;
+    gap: 1rem;
+    width: auto;
+    margin-top: 0;
+  }
+  #menuBtn {
+    display: none;
+  }
+  nav {
+    justify-content: center;
+  }
+}
 
 /* ========================= */
 /* BOTÕES                    */
 /* ========================= */
 button {
-  padding:.6rem 1.2rem;
-  border:none;
-  background-color:var(--primary-color);
-  color:#fff;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:1rem;
-  transition:background-color .2s;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
 }
-button:hover { background-color:var(--accent-color); }
+
+button:hover {
+  background-color: var(--accent-color);
+}
+
+.card button {
+  margin: 0.5rem 0.5rem 0 0;
+}
 
 /* ========================= */
 /* FORMULÁRIOS               */
 /* ========================= */
-label { display:block; margin-bottom:.4rem; font-weight:600; }
-input, select, textarea {
-  width:100%;
-  padding:.7rem;
-  border:1px solid #ccc;
-  border-radius:6px;
-  margin-bottom:1rem;
-  font-size:1rem;
-  transition:border-color .2s;
-}
-input:focus, select:focus, textarea:focus {
-  outline:none;
-  border-color:var(--primary-color);
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
 }
 
-.erro { color:#c00; display:none; margin-bottom:1rem; font-weight:500; }
-.erro.visivel { display:block; }
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.erro {
+  color: #c00;
+  margin-bottom: 1rem;
+  display: none;
+  font-weight: 500;
+}
+.erro.visivel {
+  display: block;
+}
+
+.parcelasDetalhes form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
 /* ========================= */
 /* CARDS                     */
 /* ========================= */
 .card {
-  background-color:var(--card-bg);
-  border:1px solid var(--card-border);
-  border-radius:8px;
-  padding:1rem;
-  margin:.5rem;
-  box-shadow:0 1px 5px var(--shadow-color);
-  flex:1 1 300px;
-  max-width:350px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-align:center;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem;
+  box-shadow: 0 1px 5px var(--shadow-color);
+  flex: 1 1 300px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-/* Imagem principal do card */
+/* --- Aumenta tamanho das imagens principais --- */
 .card img {
-  width: var(--card-img-size);
-  height: var(--card-img-size);
-  object-fit:cover;
-  border-radius:4px;
-  margin-bottom:.8rem;
+  max-width: 250px;       /* antes: 200px */
+  max-height: 200px;      /* antes: 150px */
+  border-radius: 4px;
+  margin-bottom: 0.8rem;
+  object-fit: cover;
 }
 
-/* Miniaturas do formulário de edição */
-.thumb-produto {
-  width: var(--card-img-size);
-  height: var(--card-img-size);
+/* ========================= */
+/* LOJA (MINIATURAS)         */
+/* ========================= */
+/* Aumenta também na loja para 200×200px */
+#lojaContainer .card img {
+  width: 200px;
+  height: 200px;
   object-fit: cover;
   border-radius: 4px;
-  margin-right: .5rem;
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
 }
 
 /* ========================= */
 /* CARROSSEL DE FOTOS        */
 /* ========================= */
 .card .gallery-container {
-  position:relative;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  width:100%;
-  height: var(--card-img-size);
-  overflow:hidden;
-  border-radius:6px;
-  margin-bottom:.8rem;
+  position: relative;
+  display: flex;
+  justify-content: center;   /* centraliza conteúdo */
+  align-items: center;       /* centraliza vertical */
+  width: 100%;
+  height: 200px;             /* antes: 150px */
+  overflow: hidden;
+  border-radius: 6px;
+  margin-bottom: 0.8rem;
 }
+
+/* Cada imagem ocupa 100%, mas é posicionada no centro */
 .card .gallery-container img {
-  position:absolute;
-  top:50%; left:50%;
-  width:100%; height:100%;
-  object-fit:cover;
-  opacity:0;
-  transform:translate(-50%,-50%);
-  transition:opacity .3s, transform .3s;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: translate(-50%, -50%); /* centraliza exatamente */
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
+/* Imagem ativa fica visível */
 .card .gallery-container img.active {
-  opacity:1;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1); /* mantém centralização */
 }
+
+/* Botões “anterior” e “próximo” */
 .card .gallery-container .prev,
 .card .gallery-container .next {
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  background:rgba(0,0,0,.4);
-  color:#fff;
-  border:none;
-  padding:.3rem .6rem;
-  cursor:pointer;
-  border-radius:4px;
-  z-index:1;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0,0,0,0.4);
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  border-radius: 4px;
+  z-index: 1;
 }
-.card .gallery-container .prev { left:.5rem; }
-.card .gallery-container .next { right:.5rem; }
+
+.card .gallery-container .prev {
+  left: 0.5rem;
+}
+
+.card .gallery-container .next {
+  right: 0.5rem;
+}
 
 /* ========================= */
-/* CONTÊINER DE CARDS        */
+/* CONTÊINER DE CARDS         */
 /* ========================= */
 #listaProdutos,
-#lojaContainer { display:flex; flex-wrap:wrap; justify-content:center; gap:1rem; margin-top:1rem; }
+#historicoContainer,
+#lojaContainer,
+#vendasPendentes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
 
 /* ========================= */
-/* RESPONSIVO                */
+/* TABELAS                   */
 /* ========================= */
-@media (max-width:1024px){ .container{width:95%;padding:1rem;} }
-@media (max-width:768px){
-  nav{flex-direction:column; align-items:center;}
-  .card{flex:1 1 100%; max-width:100%;}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+table th,
+table td {
+  border: 1px solid #ddd;
+  padding: 0.8rem;
+  text-align: left;
+}
+
+table th {
+  background-color: var(--secondary-color);
+  font-weight: 600;
+}
+
+/* ========================= */
+/* LAYOUT RESPONSIVO         */
+/* ========================= */
+@media (max-width: 1024px) {
+  .container {
+    width: 95%;
+    padding: 1rem;
+  }
+  nav {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    align-items: center;
+  }
+  .card {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+/* ========================= */
+/* ESTILIZAÇÕES ESPECÍFICAS  */
+/* ========================= */
+input[type="text"].moeda {
+  text-align: right;
+}
+
+form {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ========================= */
 /* EXTRAS                    */
 /* ========================= */
-a,button,input,select,textarea { transition:all .2s; }
+a, button, input, select {
+  transition: all 0.2s ease;
+}
