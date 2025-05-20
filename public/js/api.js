@@ -299,7 +299,13 @@ export function baixarPdfComprovante(parcelaId) {
 // LOJA PÚBLICA (VISITANTE)
 // ================================
 export async function getProdutosLoja() {
+  // NÃO usa token; é público
   const res = await fetch(`${BASE_URL}/api/public/mercadorias`);
   if (!res.ok) throw new Error("Falha ao buscar produtos");
   return await res.json();
+}
+
+export async function tickVisita() {
+  // Chama o endpoint que acabamos de criar
+  await fetch(`${BASE_URL}/api/visitas/tick`, { method: "POST" });
 }

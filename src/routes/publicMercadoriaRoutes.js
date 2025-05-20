@@ -2,9 +2,23 @@
 
 const express = require("express");
 const router = express.Router();
-const ctrl = require("../controllers/publicMercadoriaController");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
-// Rota pública para listar mercadorias na loja
-router.get("/mercadorias", ctrl.findAllPublic);
+/**
+ * GET /api/public/mercadorias
+ * Retorna todas as mercadorias (sem precisar de token).
+ * Inclui o array de fotos para cada mercadoria.
+ */
+router.get("/mercadorias", async (req, res, next) => {
+  try {
+    const mercadorias = await prisma.mercadoria.findMany({
+      include: { fotos: true },
+    });
+    return res.json(mercadorias);
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;
