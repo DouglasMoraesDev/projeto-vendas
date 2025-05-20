@@ -1,3 +1,4 @@
+<!-- public/produtos.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,7 +9,7 @@
 </head>
 <body>
   <div class="container">
-     <nav>
+    <nav>
       <button id="menuBtn">☰ Menu</button>
       <ul id="menuLinks">
         <li><a href="dashboard.html">Painel ADM</a></li>
@@ -32,30 +33,36 @@
       type="text"
       id="buscaProduto"
       placeholder="Pesquise pelo nome do produto..."
-      style="width: 100%; padding: 0.7rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid #ccc;"
+      style="
+        width: 100%;
+        padding: 0.7rem;
+        margin-bottom: 1rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      "
     />
 
-    <!-- Lista de produtos -->
+    <!-- Lista de produtos (cards) -->
     <div id="listaProdutos"></div>
   </div>
 
   <!-- Carrega script de listagem/CRUD -->
   <script type="module" src="js/produtos.js"></script>
   <script>
-    // Alternar menu
-    document.getElementById('menuBtn').addEventListener('click', () => {
-      document.getElementById('menuLinks').classList.toggle('show');
+    // Alternar menu ao clicar no botão
+    document.getElementById("menuBtn").addEventListener("click", () => {
+      document.getElementById("menuLinks").classList.toggle("show");
     });
-    // Fecha menu ao clicar no link
-    document.querySelectorAll('#menuLinks a').forEach(link => {
-      link.addEventListener('click', () => {
-        document.getElementById('menuLinks').classList.remove('show');
+    // Fecha menu ao clicar em qualquer link
+    document.querySelectorAll("#menuLinks a").forEach((link) => {
+      link.addEventListener("click", () => {
+        document.getElementById("menuLinks").classList.remove("show");
       });
     });
-    // Logout
-    const logout = document.getElementById('logout');
+    // Logout: remove token e volta para login
+    const logout = document.getElementById("logout");
     if (logout) {
-      logout.addEventListener('click', () => localStorage.removeItem('token'));
+      logout.addEventListener("click", () => localStorage.removeItem("token"));
     }
   </script>
 </body>
