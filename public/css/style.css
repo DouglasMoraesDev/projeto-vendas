@@ -59,7 +59,7 @@ p {
 /* ========================= */
 nav {
   background-color: var(--primary-color);
-  padding: 0.5rem 1rem;      /* menos padding para nav */
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   margin-bottom: 2rem;
   display: flex;
@@ -68,68 +68,61 @@ nav {
   flex-wrap: wrap;
 }
 
-/* Botão de menu (hamburger) menor */
 #menuBtn {
   background-color: transparent;
   border: none;
   color: #fff;
-  font-size: 1rem;           /* menor que antes */
-  padding: 0.25rem 0.5rem;    /* reduzido */
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
   cursor: pointer;
 }
 
-/* Lista de links oculta por padrão */
 #menuLinks {
   list-style: none;
-  display: none;              /* escondida inicialmente */
-  flex-direction: column;     /* exibir verticalmente */
+  display: none;
+  flex-direction: column;
   margin: 0;
   padding: 0;
-  width: 100%;                /* ocupa toda a largura no mobile */
+  width: 100%;
   margin-top: 0.5rem;
 }
 
-/* Quando #menuLinks tiver a classe .show, mostramos em coluna */
 #menuLinks.show {
   display: flex;
   flex-direction: column;
 }
 
-/* Cada item da lista */
 #menuLinks li {
-  margin: 0.3rem 0;           /* espaçamento vertical entre itens */
+  margin: 0.3rem 0;
 }
 
-/* Link dentro do li */
 #menuLinks a {
   color: #ffffff;
   font-weight: 600;
-  padding: 0.4rem 0.8rem;     /* espaçamento reduzido */
+  padding: 0.4rem 0.8rem;
   border-radius: 4px;
   display: block;
   text-align: left;
   transition: background-color 0.2s ease;
 }
 
-/* Hover do link */
 #menuLinks a:hover {
   background-color: var(--accent-color);
 }
 
-/* Em telas largas, mostramos os links sempre em linha e escondemos o botão */
 @media (min-width: 769px) {
   #menuLinks {
     display: flex !important;
-    flex-direction: row;      /* horizontal no desktop */
+    flex-direction: row;
     gap: 1rem;
     width: auto;
-    margin-top: 0;            /* sem margem superior */
+    margin-top: 0;
   }
   #menuBtn {
-    display: none;            /* esconde o botão em desktop */
+    display: none;
   }
   nav {
-    justify-content: center;  /* centraliza todo o nav */
+    justify-content: center;
   }
 }
 
@@ -151,9 +144,8 @@ button:hover {
   background-color: var(--accent-color);
 }
 
-/* Espaçamento entre botões dentro de .card */
 .card button {
-  margin: 0.5rem 0.5rem 0 0; /* 0.5rem à direita e em cima */
+  margin: 0.5rem 0.5rem 0 0;
 }
 
 /* ========================= */
@@ -188,7 +180,6 @@ select:focus {
   border-color: var(--primary-color);
 }
 
-/* Mensagens de erro */
 .erro {
   color: #c00;
   margin-bottom: 1rem;
@@ -199,7 +190,6 @@ select:focus {
   display: block;
 }
 
-/* Centraliza formulários e conteúdos de parcelas */
 .parcelasDetalhes form {
   display: flex;
   flex-direction: column;
@@ -224,19 +214,22 @@ select:focus {
   text-align: center;
 }
 
-/* Ajuste geral para imagens dentro de card (agora maior) */
+/* --- Aumenta tamanho das imagens principais --- */
 .card img {
-  max-width: 200px;       /* largura máxima aumentada */
-  max-height: 150px;      /* altura máxima aumentada */
+  max-width: 250px;       /* antes: 200px */
+  max-height: 200px;      /* antes: 150px */
   border-radius: 4px;
   margin-bottom: 0.8rem;
   object-fit: cover;
 }
 
-/* Na loja (lojaContainer), mantemos as miniaturas menores */
+/* ========================= */
+/* LOJA (MINIATURAS)         */
+/* ========================= */
+/* Aumenta também na loja */
 #lojaContainer .card img {
-  width: 60px;
-  height: 60px;
+  width: 100px;           /* antes: 60px */
+  height: 100px;          /* antes: 60px */
   object-fit: cover;
   border-radius: 4px;
   margin-bottom: 0.5rem;
@@ -245,37 +238,39 @@ select:focus {
 /* ========================= */
 /* CARROSSEL DE FOTOS        */
 /* ========================= */
-/* Container do carrossel: define área fixa pra imagem e centraliza */
+/* Container do carrossel */
 .card .gallery-container {
   position: relative;
-  display: flex;               /* centraliza o conteúdo */
-  justify-content: center;     /* alinha horizontalmente */
-  align-items: center;         /* alinha verticalmente */
+  display: flex;
+  justify-content: center;   /* centraliza conteúdo */
+  align-items: center;       /* centraliza vertical */
   width: 100%;
-  height: 150px;               /* altura fixa para as fotos do carrossel */
+  height: 200px;             /* antes: 150px */
   overflow: hidden;
   border-radius: 6px;
   margin-bottom: 0.8rem;
 }
 
-/* Cada imagem do carrossel cobre 100% do container, mas começa oculta */
+/* Cada imagem ocupa 100%, mas é posicionada no centro */
 .card .gallery-container img {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
   width: 100%;
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transform: translate(-50%, -50%); /* centraliza exatamente */
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Só a imagem com classe “active” fica visível */
+/* Imagem ativa fica visível */
 .card .gallery-container img.active {
   opacity: 1;
+  transform: translate(-50%, -50%) scale(1); /* mantém centralização */
 }
 
-/* Botões “anterior” e “próximo” sobrepostos à imagem */
+/* Botões “anterior” e “próximo” */
 .card .gallery-container .prev,
 .card .gallery-container .next {
   position: absolute;
@@ -287,14 +282,13 @@ select:focus {
   padding: 0.3rem 0.6rem;
   cursor: pointer;
   border-radius: 4px;
+  z-index: 1;
 }
 
-/* Posiciona “prev” à esquerda */
 .card .gallery-container .prev {
   left: 0.5rem;
 }
 
-/* Posiciona “next” à direita */
 .card .gallery-container .next {
   right: 0.5rem;
 }
@@ -302,7 +296,6 @@ select:focus {
 /* ========================= */
 /* CONTÊINER DE CARDS         */
 /* ========================= */
-/* Usado em lista de produtos, histórico, loja, parcelas */
 #listaProdutos,
 #historicoContainer,
 #lojaContainer,
@@ -362,13 +355,10 @@ table th {
 /* ========================= */
 /* ESTILIZAÇÕES ESPECÍFICAS  */
 /* ========================= */
-
-/* Ajuste de campos de valor para aceitar vírgulas (ex.: 15.000,00) */
 input[type="text"].moeda {
   text-align: right;
 }
 
-/* Centraliza formulários */
 form {
   width: 100%;
   max-width: 500px;
@@ -380,7 +370,6 @@ form {
 /* ========================= */
 /* EXTRAS                    */
 /* ========================= */
-/* Transição suave em hover */
 a, button, input, select {
   transition: all 0.2s ease;
 }
