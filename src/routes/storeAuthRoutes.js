@@ -1,12 +1,12 @@
-// src/routes/storeAuthRoutes.js
-
 const express = require("express");
 const router = express.Router();
 const ctrl = require("../controllers/storeAuthController");
 
-// Registro e login para visitantes da loja (público)
+// POST /api/store/register
 router.post("/register", ctrl.register);
-router.post("/login", ctrl.login);
-router.get("/me", ctrl.me);
+// POST /api/store/login
+router.post("/login",    ctrl.login);
+// GET  /api/store/me
+router.get("/me",        ctrl.me);
 
 module.exports = router;
