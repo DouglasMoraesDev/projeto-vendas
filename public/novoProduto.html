@@ -1,71 +1,52 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cadastrar Produto</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Novo Produto</title>
+  <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
   <div class="container">
     <nav>
       <button id="menuBtn">☰ Menu</button>
       <ul id="menuLinks">
-        <li><a href="dashboard.html">Painel ADM</a></li>
-        <li><a href="clientesList.html">Clientes</a></li>
-        <li><a href="novoCliente.html">Cadastrar Clientes</a></li>
-        <li><a href="produtos.html">Mercadorias</a></li>
-        <li><a href="novoProduto.html">Cadastrar Mercadorias</a></li>
-        <li><a href="vendas.html">Cadastrar Venda</a></li>
-        <li><a href="historico.html">Histórico de Vendas</a></li>
-        <li><a href="controleParcelas.html">Controle de Parcelas</a></li>
-        <li><a href="comprovantes.html">Comprovantes de Vendas</a></li>
-        <li><a href="loja.html">Loja</a></li>
-        <li><a href="index.html" id="logout">Sair</a></li>
+        <!-- seus links -->
+        <li><a href="produtos.html">Voltar</a></li>
       </ul>
     </nav>
 
-    <h1>Cadastrar Novo Produto</h1>
+    <h1 id="tituloForm">Cadastrar Produto</h1>
+    <div id="erroProd" class="erro"></div>
 
-    <!-- Apenas o formulário de cadastro -->
-    <div id="erroProduto" class="erro"></div>
-    <form id="formNovoProduto" enctype="multipart/form-data">
+    <form id="formProduto" enctype="multipart/form-data">
       <label for="nome">Nome:</label>
-      <input type="text" id="nome" name="nome" required />
+      <input type="text" id="nome" name="nome" required/>
 
       <label for="descricao">Descrição:</label>
-      <input type="text" id="descricao" name="descricao" />
+      <textarea id="descricao" name="descricao"></textarea>
 
-      <label for="valor">Valor Unitário (R$):</label>
-      <input type="text" id="valor" name="valor" placeholder="Ex: 15.000,00" required />
+      <label for="valorUnitario">Valor Unitário (R$):</label>
+      <input type="text" id="valorUnitario" name="valorUnitario" required/>
 
-      <label for="quantidade">Quantidade em Estoque:</label>
-      <input type="number" id="quantidade" name="quantidade" required />
+      <label for="quantidadeEstoque">Quantidade em Estoque:</label>
+      <input type="number" id="quantidadeEstoque" name="quantidadeEstoque" min="0" required/>
 
-      <label for="fotos">Fotos (máx. 5):</label>
-      <input type="file" id="fotos" name="fotos" accept="image/*" multiple />
+      <label for="fotos">Fotos (até 5):</label>
+      <input type="file" id="fotos" name="fotos" accept="image/*" multiple/>
 
-      <button type="submit">Cadastrar Produto</button>
+      <!-- preview de fotos existentes -->
+      <div id="previewExistente" style="display:flex; gap:0.5rem; margin-bottom:1rem;"></div>
+
+      <button type="submit" id="btnSalvar">Salvar</button>
     </form>
   </div>
 
   <script type="module" src="js/novoProduto.js"></script>
   <script>
-    // Alternar menu
-    document.getElementById('menuBtn').addEventListener('click', () => {
-      document.getElementById('menuLinks').classList.toggle('show');
+    document.getElementById("menuBtn").addEventListener("click", ()=>{
+      document.getElementById("menuLinks").classList.toggle("show");
     });
-    // Fecha menu ao clicar no link
-    document.querySelectorAll('#menuLinks a').forEach(link => {
-      link.addEventListener('click', () => {
-        document.getElementById('menuLinks').classList.remove('show');
-      });
-    });
-    // Logout
-    const logout = document.getElementById('logout');
-    if (logout) {
-      logout.addEventListener('click', () => localStorage.removeItem('token'));
-    }
   </script>
 </body>
 </html>

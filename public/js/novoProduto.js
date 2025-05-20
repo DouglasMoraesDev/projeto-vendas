@@ -1,46 +1,63 @@
-// public/js/novoProduto.js
+import {
+  getProdutoById,
+  criarProduto,
+  atualizarProduto,
+} from "./api.js";
 
-import { criarProduto } from "./api.js";
+const form = document.getElementById("formProduto");
+const titulo = document.getElementById("tituloForm");
+const erro = document.getElementById("erroProd");
+const previewExist = document.getElementById("previewExistente");
+const inputFotos = document.getElementById("fotos");
 
-const formNovoProduto = document.getElementById("formNovoProduto");
-const erroProduto = document.getElementById("erroProduto");
+let modoEdicao = false;
+let produtoId = null;
 
-// Converte string do tipo “15.000,00” → float 15000.00
-function parseMoedaBr(valorStr) {
-  return parseFloat(valorStr.replace(/\./g, "").replace(",", ".")) || 0;
+function fmtBRL(v){
+  return v.toFixed(2).replace(".",",");
 }
 
-formNovoProduto.addEventListener("submit", async (e) => {
+// extrai query string
+const params = new URLSearchParams(location.search);
+if(params.has("edit")){
+  modoEdicao = true;
+  produtoId = params.get("edit");
+  titulo.textContent = `Editar Produto #${produtoId}`;
+
+  // busca dados existentes
+  getProdutoById(produtoId).then(p=>{
+    form.nome.value = p.nome;
+    form.descricao.value = p.descricao;
+    form.valorUnitario.value = p.valorUnitario.toFixed(2).replace(".",",");
+    form.quantidadeEstoque.value = p.quantidadeEstoque;
+
+    // mostra preview de cada foto atual
+    previewExist.innerHTML = "";
+    (p.fotos||[]).forEach(f=>{
+      const img = document.createElement("img");
+      img.src = `${f.caminho}`;
+      img.style.width = img.style.height = "var(--card-img-size)";
+      img.style.objectFit = "cover";
+      previewExist.appendChild(img);
+    });
+  }).catch(()=> erro.textContent = "Não foi possível carregar o produto.");
+}
+
+form.addEventListener("submit", async e=>{
   e.preventDefault();
-  erroProduto.textContent = "";
-  erroProduto.classList.remove("visivel");
+  erro.textContent = "";
 
-  const nome = formNovoProduto.nome.value.trim();
-  const descricao = formNovoProduto.descricao.value.trim();
-  const valorUnitario = parseMoedaBr(formNovoProduto.valor.value);
-  const quantidadeEstoque = parseInt(formNovoProduto.quantidade.value) || 0;
-  const fotos = Array.from(formNovoProduto.fotos.files);
-
-  if (!nome || valorUnitario <= 0 || quantidadeEstoque < 0) {
-    erroProduto.textContent = "Preencha nome, valor e quantidade corretamente.";
-    erroProduto.classList.add("visivel");
-    return;
-  }
-
+  const data = new FormData(form);
   try {
-    await criarProduto({ nome, descricao, valorUnitario, quantidadeEstoque, fotos });
-    alert("Produto cadastrado com sucesso!");
-    // Limpa formulário após cadastro
-    formNovoProduto.reset();
+    if(modoEdicao){
+      await atualizarProduto(produtoId, data);
+      alert("Produto atualizado!");
+    } else {
+      await criarProduto(data);
+      alert("Produto criado!");
+    }
+    location.href = "produtos.html";
   } catch (err) {
-    erroProduto.textContent = err.message;
-    erroProduto.classList.add("visivel");
-  }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Se não estiver logado, redireciona
-  if (!localStorage.getItem("token")) {
-    window.location.href = "index.html";
+    erro.textContent = err.message;
   }
 });
