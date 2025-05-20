@@ -2,7 +2,6 @@
 
 import {
   getClientes,
-  atualizarCliente,
   excluirCliente
 } from "./api.js";
 
@@ -51,11 +50,11 @@ function renderizarClientes(clientes) {
     containerListaClientes.appendChild(card);
   });
 
-  // Adiciona listeners aos botões
+  // Botão “Editar” agora redireciona para a página de edição
   document.querySelectorAll(".editar-btn").forEach(btn => {
     btn.addEventListener("click", e => {
       const id = e.target.dataset.id;
-      editarCliente(id);
+      window.location.href = `novoCliente.html?edit=${id}`;
     });
   });
 
@@ -72,41 +71,6 @@ function renderizarClientes(clientes) {
       }
     });
   });
-}
-
-// Exibe prompts para edição (simples)
-async function editarCliente(id) {
-  const cliente = listaClientesCache.find(c => c.id == id);
-  if (!cliente) return alert("Cliente não encontrado.");
-
-  // Solicita novos valores via prompt
-  const novoNome = prompt("Novo nome:", cliente.nome);
-  if (novoNome === null) return; // cancelou
-
-  const novoCpf = prompt("Novo CPF:", cliente.cpf);
-  if (novoCpf === null) return; // cancelou
-
-  const novoTel = prompt("Novo telefone:", cliente.telefone || "");
-  if (novoTel === null) return;
-
-  const novoEnd = prompt("Novo endereço:", cliente.endereco || "");
-  if (novoEnd === null) return;
-
-  if (!novoNome.trim() || !novoCpf.trim()) {
-    return alert("Nome e CPF são obrigatórios.");
-  }
-
-  try {
-    await atualizarCliente(id, {
-      nome: novoNome.trim(),
-      cpf: novoCpf.trim(),
-      telefone: novoTel.trim(),
-      endereco: novoEnd.trim()
-    });
-    carregarLista();
-  } catch (err) {
-    alert("Erro ao atualizar cliente: " + err.message);
-  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

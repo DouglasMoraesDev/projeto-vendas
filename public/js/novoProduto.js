@@ -46,7 +46,21 @@ form.addEventListener("submit", async e => {
   erro.textContent = "";
   erro.classList.remove("visivel");
 
+  // 1) Vamos “limpar” a string que o usuário digitou
+  //    Suponha que ele escreva “R$ 15.000,00” ou “15.000,00” ou “15000,00”
+  let rawValor = form.valorUnitario.value.trim();
+
+  // - Remove “R$”, espaços e pontos (milhares)
+  // - Troca vírgula por ponto
+  rawValor = rawValor
+    .replace(/[R$\s]/g, "")   // tira “R$” e espaços em branco
+    .replace(/\./g, "")       // tira todos os pontos
+    .replace(",", ".");       // troca vírgula por ponto
+
+  // 2) Monta o FormData COM o campo “valorUnitario” já no formato numérico “pt-BR → en-US”
   const data = new FormData(form);
+  data.set("valorUnitario", rawValor);
+
   try {
     if (modoEdicao) {
       await atualizarProduto(produtoId, data);

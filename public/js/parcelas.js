@@ -10,7 +10,7 @@ const containerVendasPendentes = document.getElementById("vendasPendentes");
 
 // Formata R$ 1.234,56
 function formatarMoedaBr(valor) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor);
 }
 
 // 1) Busca todas as parcelas pendentes e agrupa por vendaId
@@ -69,10 +69,17 @@ function mostrarDetalhesParcela(vendaId, parcelas, container) {
   container.innerHTML = ""; // limpa antes de reencher
 
   parcelas.forEach(p => {
+    // *** AQUI EXTRAIR E FORMATAR A DATA SEM CONVERSÃO ***
+    // Exemplo: p.dataVencimento = "2023-05-10T00:00:00.000Z"
+    const isoDateTime = p.dataVencimento;         // "YYYY-MM-DDTHH:mm:ss.sssZ"
+    const isoDate = isoDateTime.split("T")[0];    // pega "YYYY-MM-DD"
+    const [yyyy, mm, dd] = isoDate.split("-");    // separa em [YYYY, MM, DD]
+    const dataVencimentoBr = `${dd}/${mm}/${yyyy}`; // monta "DD/MM/YYYY"
+
     const form = document.createElement("form");
     form.id = `formPag-${p.id}`;
     form.innerHTML = `
-      <p>Parcela ${p.numParcela} — Valor: ${formatarMoedaBr(p.valorParcela)} — Vencimento: ${new Date(p.dataVencimento).toLocaleDateString('pt-BR')}</p>
+      <p>Parcela ${p.numParcela} — Valor: ${formatarMoedaBr(p.valorParcela)} — Vencimento: ${dataVencimentoBr}</p>
       <label for="arquivo-${p.id}">Comprovante (PDF/imagem):</label>
       <input type="file" id="arquivo-${p.id}" name="comprovante" accept="image/*,.pdf" required />
       <label for="recebidoPor-${p.id}">Recebido Por:</label>
