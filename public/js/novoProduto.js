@@ -12,14 +12,13 @@ const previewExist = document.getElementById("previewExistente");
 let modoEdicao = false;
 let produtoId = null;
 
-// Detecta modo edição pela query string
+// Detecta modo edição pela query
 const params = new URLSearchParams(location.search);
 if (params.has("edit")) {
   modoEdicao = true;
   produtoId = params.get("edit");
   titulo.textContent = `Editar Produto #${produtoId}`;
 
-  // busca e pré-preenche
   getProdutoById(produtoId)
     .then(p => {
       form.nome.value = p.nome;
@@ -27,11 +26,12 @@ if (params.has("edit")) {
       form.valorUnitario.value = p.valorUnitario.toFixed(2).replace(".", ",");
       form.quantidadeEstoque.value = p.quantidadeEstoque;
 
-      // mostra preview das fotos existentes
       previewExist.innerHTML = "";
       (p.fotos || []).forEach(f => {
         const img = document.createElement("img");
-        img.src = f.caminho; // caminho público
+        img.src = f.caminho;
+        img.style.width = img.style.height = "200px";  // 200×200 px
+        img.style.objectFit = "cover";
         previewExist.appendChild(img);
       });
     })
@@ -41,7 +41,6 @@ if (params.has("edit")) {
     });
 }
 
-// submissão
 form.addEventListener("submit", async e => {
   e.preventDefault();
   erro.textContent = "";

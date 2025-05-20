@@ -50,8 +50,9 @@ module.exports = {
       const dest = path.join(__dirname, '../../uploads/produtos', String(nova.id));
       if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
 
+      const arquivos = Array.isArray(req.files) ? req.files : [];
       const fotosData = [];
-      (req.files || []).slice(0, 5).forEach(file => {
+      arquivos.slice(0, 5).forEach(file => {
         const ext = path.extname(file.originalname);
         const filename = file.filename + ext;
         fs.renameSync(file.path, path.join(dest, filename));
@@ -92,11 +93,12 @@ module.exports = {
       });
 
       // grava novas fotos se houver
-      if (Array.isArray(req.files) && req.files.length) {
+      const arquivos = Array.isArray(req.files) ? req.files : [];
+      if (arquivos.length > 0) {
         const dest = path.join(__dirname, '../../uploads/produtos', String(id));
         if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
 
-        for (const file of req.files.slice(0, 5)) {
+        for (const file of arquivos.slice(0, 5)) {
           const ext = path.extname(file.originalname);
           const filename = file.filename + ext;
           fs.renameSync(file.path, path.join(dest, filename));

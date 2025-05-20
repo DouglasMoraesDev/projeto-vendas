@@ -9,10 +9,10 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-router.get('/',        ctrl.findAll);
-router.get('/:id',     ctrl.findById);
-router.post('/',       upload.array('fotos', 5), ctrl.create);
-router.put('/:id',     upload.array('fotos', 5), ctrl.update); // ✅ Correto agora
-router.delete('/:id',  ctrl.remove);
+router.get('/',       ctrl.findAll);
+router.get('/:id',    ctrl.findById);
+router.post('/',      upload.array('fotos', 5), ctrl.create);
+router.put('/:id',    upload.array('fotos', 5), ctrl.update);
+router.delete('/:id', ctrl.remove);
 
 module.exports = router;
