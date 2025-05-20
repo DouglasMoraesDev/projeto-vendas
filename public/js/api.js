@@ -97,7 +97,6 @@ export async function excluirCliente(id) {
     const erroJson = await resp.json();
     throw new Error(erroJson.error || "Erro ao excluir cliente");
   }
-  return;
 }
 
 // ================================
@@ -121,19 +120,14 @@ export async function getProdutoById(id) {
   return resp.json();
 }
 
-export async function criarProduto(dados) {
+export async function criarProduto(formData) {
   const token = localStorage.getItem("token");
-  const formData = new FormData();
-  formData.append("nome", dados.nome);
-  formData.append("descricao", dados.descricao);
-  formData.append("valorUnitario", dados.valorUnitario);
-  formData.append("quantidadeEstoque", dados.quantidadeEstoque);
-  dados.fotos.forEach((foto) => formData.append("fotos", foto));
-
   const resp = await fetch(`${BASE_URL}/api/mercadorias`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
+    headers: {
+      Authorization: `Bearer ${token}` // não definir Content-Type
+    },
+    body: formData // FormData com campos + arquivos
   });
   if (!resp.ok) {
     const erroJson = await resp.json();
@@ -142,15 +136,14 @@ export async function criarProduto(dados) {
   return resp.json();
 }
 
-export async function atualizarProduto(id, dados) {
+export async function atualizarProduto(id, formData) {
   const token = localStorage.getItem("token");
   const resp = await fetch(`${BASE_URL}/api/mercadorias/${id}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}` // não definir Content-Type
     },
-    body: JSON.stringify(dados),
+    body: formData // FormData com campos + arquivos
   });
   if (!resp.ok) {
     const erroJson = await resp.json();
@@ -169,7 +162,6 @@ export async function excluirProduto(id) {
     const erroJson = await resp.json();
     throw new Error(erroJson.error || "Erro ao excluir produto");
   }
-  return;
 }
 
 // ================================
@@ -220,7 +212,6 @@ export async function excluirVenda(id) {
     const erroJson = await resp.json();
     throw new Error(erroJson.error || "Erro ao excluir venda");
   }
-  return;
 }
 
 export async function atualizarVenda(id, dados) {
@@ -299,13 +290,11 @@ export function baixarPdfComprovante(parcelaId) {
 // LOJA PÚBLICA (VISITANTE)
 // ================================
 export async function getProdutosLoja() {
-  // NÃO usa token; é público
   const res = await fetch(`${BASE_URL}/api/public/mercadorias`);
   if (!res.ok) throw new Error("Falha ao buscar produtos");
-  return await res.json();
+  return res.json();
 }
 
 export async function tickVisita() {
-  // Chama o endpoint que acabamos de criar
   await fetch(`${BASE_URL}/api/visitas/tick`, { method: "POST" });
 }
