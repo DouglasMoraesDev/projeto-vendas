@@ -6,6 +6,8 @@ const prisma = new PrismaClient();
 module.exports = {
   // POST /api/vendas
   async create(req, res, next) {
+    console.log(">>> [VENDAS.CREATE] Recebeu POST /api/vendas →", JSON.stringify(req.body));
+
     const {
       dataVenda,
       clienteId,

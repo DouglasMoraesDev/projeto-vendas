@@ -22,6 +22,35 @@ function formatarMoedaBr(valor) {
   }).format(valor);
 }
 
+
+async function fetchVisitas() {
+  const token = localStorage.getItem("token");
+  const resp = await fetch(`${BASE_URL}/api/visitas/count`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!resp.ok) throw new Error("Erro ao buscar visitas");
+  const json = await resp.json();
+  return json.total;
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!localStorage.getItem("token")) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  try {
+    const [resumo, totalVisitas] = await Promise.all([
+      fetchDashboard(),
+      fetchVisitas()
+    ]);
+    resumo.totalVisitas = totalVisitas;  // injeta o dado
+    renderizarResumo(resumo);
+    renderizarNotificacoes(resumo.notificacoes);
+  } catch (err) {
+    console.error(err);
+  }
+});
 // Exibe totais de clientes, produtos, vendas e visitas
 function renderizarResumo(resumo) {
   document.getElementById("totalClientes").textContent =
@@ -54,20 +83,4 @@ function renderizarNotificacoes(notificacoes) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  // Se não estiver logado (token de admin), redireciona para login interno
-  if (!localStorage.getItem("token")) {
-    window.location.href = "index.html";
-    return;
-  }
 
-  try {
-    const resumo = await fetchDashboard();
-    // O endpoint /api/dashboard deve retornar algo como:
-    // { totalClientes: X, totalProdutos: Y, totalVendas: Z, totalVisitas: W, notificacoes: […] }
-    renderizarResumo(resumo);
-    renderizarNotificacoes(resumo.notificacoes);
-  } catch (err) {
-    console.error(err);
-  }
-});
