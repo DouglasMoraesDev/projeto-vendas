@@ -61,13 +61,11 @@ module.exports = {
       // 4. Move e coleta metadados
       const fotosData = [];
       arquivos.slice(0, 5).forEach(file => {
-        const ext = path.extname(file.originalname);
-        const filename = file.filename + ext;
-        const finalPath = path.join(dest, filename);
+        const finalPath = path.join(dest, file.originalname);
         fs.renameSync(file.path, finalPath);
         fotosData.push({
           mercadoriaId: nova.id,
-          caminho: `/uploads/produtos/${nova.id}/${filename}`
+          caminho: `/uploads/produtos/${nova.id}/${file.originalname}`
         });
       });
 
@@ -114,14 +112,12 @@ module.exports = {
         }
 
         for (const file of arquivos.slice(0, 5)) {
-          const ext = path.extname(file.originalname);
-          const filename = file.filename + ext;
-          const finalPath = path.join(dest, filename);
+          const finalPath = path.join(dest, file.originalname);
           fs.renameSync(file.path, finalPath);
           await prisma.foto.create({
             data: {
               mercadoriaId: id,
-              caminho: `/uploads/produtos/${id}/${filename}`
+              caminho: `/uploads/produtos/${id}/${file.originalname}`
             }
           });
         }
